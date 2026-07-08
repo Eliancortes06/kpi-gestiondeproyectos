@@ -356,7 +356,7 @@ function IndicadorFormDialog({
       return;
     }
     setErrors({});
-    onSubmit(parsed.data);
+    onSubmit({ ...parsed.data, observaciones: parsed.data.observaciones ?? null });
   }
 
   return (
