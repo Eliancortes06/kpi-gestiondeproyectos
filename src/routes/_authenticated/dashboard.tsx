@@ -280,7 +280,7 @@ function topCausesData(
   seriesByMotivo: Record<string, { value: number | null }[]>,
 ) {
   return motivos
-    .filter((m) => m.nombre.toLowerCase() !== "ok")
+    .filter((m) => m.nombre.toLowerCase() !== "on time")
     .map((m) => {
       const values = (seriesByMotivo[m.id] ?? []).map((s) => s.value ?? 0);
       const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
