@@ -73,7 +73,7 @@ export function FiltersBar({
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 {[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => (
-                  <SelectItem key={m} value={String(m)}>{m}</SelectItem>
+                  <SelectItem key={m} value={String(m)}>{MONTH_NAMES_ES[m - 1]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
