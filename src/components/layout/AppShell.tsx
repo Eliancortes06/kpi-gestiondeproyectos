@@ -29,7 +29,6 @@ type NavItem = {
 const NAV: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/indicadores", label: "Gestión de Indicadores", icon: ClipboardList },
-  { to: "/insights", label: "Insights Inteligentes", icon: Sparkles },
   { to: "/reportes", label: "Reportes", icon: FileBarChart2 },
   { to: "/admin", label: "Administración", icon: Settings2, adminOnly: true },
 ];
