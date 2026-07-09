@@ -80,8 +80,8 @@ function DashboardPage() {
     for (const p of periods) {
       byMonth[p.mes] = byMonth[p.mes] ?? {};
     }
-    // total delay = 100 - OK for each period
-    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "ok");
+    // total delay = 100 - On Time for each period
+    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "on time");
     for (const p of periods) {
       const ok = enriched.find((r) => r.anio === p.anio && r.mes === p.mes && r.motivo_id === okMotivo?.id);
       byMonth[p.mes] = byMonth[p.mes] ?? {};
@@ -116,7 +116,7 @@ function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-primary">Dashboard Ejecutivo</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Cumplimiento & Causas de Retraso</h1>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Indicadores y Cumplimiento</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {latest ? `Último periodo: ${periodLabel(latest.anio, latest.mes, false)}` : "Sin datos"}
             {previous ? ` · comparado con ${periodLabel(previous.anio, previous.mes, false)}` : ""}
@@ -135,11 +135,11 @@ function DashboardPage() {
           const series = seriesByMotivo[m.id] ?? [];
           const value = latest ? series.find((s) => s.anio === latest.anio && s.mes === latest.mes)?.value ?? null : null;
           const prev = previous ? series.find((s) => s.anio === previous.anio && s.mes === previous.mes)?.value ?? null : null;
-          const isOk = m.nombre.toLowerCase() === "ok";
+          const isOk = m.nombre.toLowerCase() === "on time";
           return (
             <KpiCard
               key={m.id}
-              label={m.nombre === "OK" ? "Proyectos entregados a tiempo" : m.nombre}
+              label={m.nombre}
               value={value}
               previous={prev}
               color={m.color}
@@ -154,21 +154,31 @@ function DashboardPage() {
         <Card className="card-elevated p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Evolución mensual — todas las causas</h2>
-              <p className="text-sm text-muted-foreground">Gráfica de barras apiladas por motivo.</p>
+              <h2 className="text-lg font-semibold tracking-tight">Evolución mensual — causas de retraso</h2>
+              <p className="text-sm text-muted-foreground">Barras apiladas por motivo (excluye On Time).</p>
             </div>
           </div>
-          <div className="h-[380px]">
+          <div className="h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stackedData} margin={{ top: 8, right: 16, bottom: 8, left: -8 }}>
+              <BarChart data={stackedData} margin={{ top: 8, right: 16, bottom: 8, left: -8 }} barCategoryGap="25%">
                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} unit="%" />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => [`${v}%`, name]} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {motivos.filter((m) => m.activo).map((m) => (
-                  <Bar key={m.id} dataKey={m.nombre} stackId="a" fill={m.color} radius={[2, 2, 0, 0]} />
-                ))}
+                <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} iconType="circle" />
+                {motivos
+                  .filter((m) => m.activo && m.nombre.toLowerCase() !== "on time")
+                  .map((m, i, arr) => (
+                    <Bar
+                      key={m.id}
+                      dataKey={m.nombre}
+                      stackId="a"
+                      fill={m.color}
+                      stroke="var(--color-background)"
+                      strokeWidth={1.5}
+                      radius={i === arr.length - 1 ? [4, 4, 0, 0] : 0}
+                    />
+                  ))}
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -176,12 +186,12 @@ function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <Card className="card-elevated p-5">
-            <h3 className="text-lg font-semibold tracking-tight">Tendencia de cumplimiento (OK)</h3>
+            <h3 className="text-lg font-semibold tracking-tight">Tendencia de cumplimiento (On Time)</h3>
             <p className="text-sm text-muted-foreground">Porcentaje de proyectos entregados a tiempo por mes.</p>
             <div className="mt-4 h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={stackedData.map((d) => ({ label: d.label, OK: d.OK }))}
+                  data={stackedData.map((d) => ({ label: d.label, "On Time": d["On Time"] }))}
                   margin={{ top: 8, right: 16, bottom: 8, left: -8 }}
                 >
                   <defs>
@@ -193,8 +203,8 @@ function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} unit="%" domain={[0, 100]} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, "OK"]} />
-                  <Area type="monotone" dataKey="OK" stroke="#22c55e" strokeWidth={2.5} fill="url(#okgrad)" />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, "On Time"]} />
+                  <Area type="monotone" dataKey="On Time" stroke="#22c55e" strokeWidth={2.5} fill="url(#okgrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -270,7 +280,7 @@ function topCausesData(
   seriesByMotivo: Record<string, { value: number | null }[]>,
 ) {
   return motivos
-    .filter((m) => m.nombre.toLowerCase() !== "ok")
+    .filter((m) => m.nombre.toLowerCase() !== "on time")
     .map((m) => {
       const values = (seriesByMotivo[m.id] ?? []).map((s) => s.value ?? 0);
       const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
@@ -323,7 +333,7 @@ function HeatmapCard({
                 {periods.map((p) => {
                   const v = seriesByMotivo[m.id]?.find((s) => s.anio === p.anio && s.mes === p.mes)?.value ?? 0;
                   const intensity = Math.min(v / max, 1);
-                  const isOk = m.nombre.toLowerCase() === "ok";
+                  const isOk = m.nombre.toLowerCase() === "on time";
                   const base = isOk ? "34,197,94" : v > 30 ? "121,22,29" : "31,63,94";
                   return (
                     <td

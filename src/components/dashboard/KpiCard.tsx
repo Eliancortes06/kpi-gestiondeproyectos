@@ -57,8 +57,8 @@ export function KpiCard({
         style={{ background: color }}
       />
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground truncate">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground leading-snug min-h-[2.5rem]">
             {label}
           </p>
           <p className="mt-2 text-3xl font-bold tracking-tight tabular-nums">
@@ -77,7 +77,7 @@ export function KpiCard({
       </div>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        {previous == null ? "Sin mes anterior" : `Mes anterior: ${previous.toFixed(0)}%`}
+        {previous == null ? "No previous month" : `Previous: ${previous.toFixed(0)}%`}
       </p>
 
       {sparkline && sparkline.length > 1 && (
