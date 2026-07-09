@@ -57,8 +57,8 @@ export function KpiCard({
         style={{ background: color }}
       />
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground truncate">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground leading-snug min-h-[2.5rem]">
             {label}
           </p>
           <p className="mt-2 text-3xl font-bold tracking-tight tabular-nums">
