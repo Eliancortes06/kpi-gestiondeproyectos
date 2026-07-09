@@ -186,12 +186,12 @@ function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <Card className="card-elevated p-5">
-            <h3 className="text-lg font-semibold tracking-tight">Tendencia de cumplimiento (OK)</h3>
+            <h3 className="text-lg font-semibold tracking-tight">Tendencia de cumplimiento (On Time)</h3>
             <p className="text-sm text-muted-foreground">Porcentaje de proyectos entregados a tiempo por mes.</p>
             <div className="mt-4 h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={stackedData.map((d) => ({ label: d.label, OK: d.OK }))}
+                  data={stackedData.map((d) => ({ label: d.label, "On Time": d["On Time"] }))}
                   margin={{ top: 8, right: 16, bottom: 8, left: -8 }}
                 >
                   <defs>
@@ -203,8 +203,8 @@ function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} unit="%" domain={[0, 100]} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, "OK"]} />
-                  <Area type="monotone" dataKey="OK" stroke="#22c55e" strokeWidth={2.5} fill="url(#okgrad)" />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, "On Time"]} />
+                  <Area type="monotone" dataKey="On Time" stroke="#22c55e" strokeWidth={2.5} fill="url(#okgrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
