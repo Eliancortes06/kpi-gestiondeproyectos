@@ -116,7 +116,7 @@ function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-primary">Dashboard Ejecutivo</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Cumplimiento & Causas de Retraso</h1>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Indicadores y Cumplimiento</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {latest ? `Último periodo: ${periodLabel(latest.anio, latest.mes, false)}` : "Sin datos"}
             {previous ? ` · comparado con ${periodLabel(previous.anio, previous.mes, false)}` : ""}
