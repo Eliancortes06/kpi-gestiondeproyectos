@@ -8,7 +8,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   ClipboardList,
-  Sparkles,
   FileBarChart2,
   Settings2,
   LogOut,
