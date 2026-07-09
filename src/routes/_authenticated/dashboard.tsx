@@ -154,21 +154,31 @@ function DashboardPage() {
         <Card className="card-elevated p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Evolución mensual — todas las causas</h2>
-              <p className="text-sm text-muted-foreground">Gráfica de barras apiladas por motivo.</p>
+              <h2 className="text-lg font-semibold tracking-tight">Evolución mensual — causas de retraso</h2>
+              <p className="text-sm text-muted-foreground">Barras apiladas por motivo (excluye On Time).</p>
             </div>
           </div>
-          <div className="h-[380px]">
+          <div className="h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stackedData} margin={{ top: 8, right: 16, bottom: 8, left: -8 }}>
+              <BarChart data={stackedData} margin={{ top: 8, right: 16, bottom: 8, left: -8 }} barCategoryGap="25%">
                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} unit="%" />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => [`${v}%`, name]} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {motivos.filter((m) => m.activo).map((m) => (
-                  <Bar key={m.id} dataKey={m.nombre} stackId="a" fill={m.color} radius={[2, 2, 0, 0]} />
-                ))}
+                <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} iconType="circle" />
+                {motivos
+                  .filter((m) => m.activo && m.nombre.toLowerCase() !== "on time")
+                  .map((m, i, arr) => (
+                    <Bar
+                      key={m.id}
+                      dataKey={m.nombre}
+                      stackId="a"
+                      fill={m.color}
+                      stroke="var(--color-background)"
+                      strokeWidth={1.5}
+                      radius={i === arr.length - 1 ? [4, 4, 0, 0] : 0}
+                    />
+                  ))}
               </BarChart>
             </ResponsiveContainer>
           </div>
