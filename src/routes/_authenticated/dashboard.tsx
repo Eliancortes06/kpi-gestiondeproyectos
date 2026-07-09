@@ -135,11 +135,11 @@ function DashboardPage() {
           const series = seriesByMotivo[m.id] ?? [];
           const value = latest ? series.find((s) => s.anio === latest.anio && s.mes === latest.mes)?.value ?? null : null;
           const prev = previous ? series.find((s) => s.anio === previous.anio && s.mes === previous.mes)?.value ?? null : null;
-          const isOk = m.nombre.toLowerCase() === "ok";
+          const isOk = m.nombre.toLowerCase() === "on time";
           return (
             <KpiCard
               key={m.id}
-              label={m.nombre === "OK" ? "Proyectos entregados a tiempo" : m.nombre}
+              label={m.nombre}
               value={value}
               previous={prev}
               color={m.color}
