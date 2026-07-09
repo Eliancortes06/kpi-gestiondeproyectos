@@ -77,7 +77,7 @@ export function KpiCard({
       </div>
 
       <p className="mt-1 text-xs text-muted-foreground">
-        {previous == null ? "Sin mes anterior" : `Mes anterior: ${previous.toFixed(0)}%`}
+        {previous == null ? "No previous month" : `Previous: ${previous.toFixed(0)}%`}
       </p>
 
       {sparkline && sparkline.length > 1 && (
