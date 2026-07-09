@@ -333,7 +333,7 @@ function HeatmapCard({
                 {periods.map((p) => {
                   const v = seriesByMotivo[m.id]?.find((s) => s.anio === p.anio && s.mes === p.mes)?.value ?? 0;
                   const intensity = Math.min(v / max, 1);
-                  const isOk = m.nombre.toLowerCase() === "ok";
+                  const isOk = m.nombre.toLowerCase() === "on time";
                   const base = isOk ? "34,197,94" : v > 30 ? "121,22,29" : "31,63,94";
                   return (
                     <td
