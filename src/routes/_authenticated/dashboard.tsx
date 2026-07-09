@@ -80,8 +80,8 @@ function DashboardPage() {
     for (const p of periods) {
       byMonth[p.mes] = byMonth[p.mes] ?? {};
     }
-    // total delay = 100 - OK for each period
-    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "ok");
+    // total delay = 100 - On Time for each period
+    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "on time");
     for (const p of periods) {
       const ok = enriched.find((r) => r.anio === p.anio && r.mes === p.mes && r.motivo_id === okMotivo?.id);
       byMonth[p.mes] = byMonth[p.mes] ?? {};
