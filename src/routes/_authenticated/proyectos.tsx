@@ -59,8 +59,8 @@ function useProyectos() {
   return useQuery({
     queryKey: ["proyectos"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("proyectos_seguimiento" as never)
+      const { data, error } = await (supabase as any)
+        .from("proyectos_seguimiento")
         .select("*")
         .order("anio", { ascending: false })
         .order("mes", { ascending: false })
