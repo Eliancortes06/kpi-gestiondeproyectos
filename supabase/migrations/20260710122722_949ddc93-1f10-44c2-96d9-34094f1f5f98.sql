@@ -1,0 +1,88 @@
+-- Table for project-level tracking
+CREATE TABLE public.proyectos_seguimiento (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  anio integer NOT NULL,
+  mes integer NOT NULL,
+  project_id text NOT NULL,
+  project_name text,
+  customer text,
+  motivo text,
+  production_end_date date,
+  promise_date date,
+  project_status text,
+  project_manager text,
+  chassis_model text,
+  chassis_brand text,
+  chassis_status text,
+  tank_status text,
+  tank_vin text,
+  tank_date_delivery date,
+  l5_model text,
+  highlights text,
+  created_by uuid,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (anio, mes, project_id)
+);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.proyectos_seguimiento TO authenticated;
+GRANT ALL ON public.proyectos_seguimiento TO service_role;
+ALTER TABLE public.proyectos_seguimiento ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "auth read proyectos" ON public.proyectos_seguimiento FOR SELECT TO authenticated USING (true);
+CREATE POLICY "admins manage proyectos" ON public.proyectos_seguimiento FOR ALL TO authenticated USING (has_role(auth.uid(), 'admin'::app_role)) WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
+CREATE TRIGGER trg_proyectos_updated_at BEFORE UPDATE ON public.proyectos_seguimiento FOR EACH ROW EXECUTE FUNCTION public.tg_set_updated_at();
+CREATE INDEX idx_proyectos_pid ON public.proyectos_seguimiento (project_id);
+CREATE INDEX idx_proyectos_periodo ON public.proyectos_seguimiento (anio, mes);
+
+INSERT INTO public.proyectos_seguimiento (anio,mes,project_id,project_name,customer,motivo,production_end_date,promise_date,project_status,project_manager,chassis_model,chassis_brand,chassis_status,tank_status,tank_vin,tank_date_delivery,l5_model,highlights) VALUES
+(2026,5,'T4200','T4200 - FS300J 300GPM Jet Fixed Skid','STOCK','OK','2026-05-11'::date,'2026-04-30'::date,'Complete','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'FS300J','Jet 300GPM Fixed Skid'),
+(2026,5,'T4633','T4633 - THC450SL 450GPM Towable Hydrant Cart','PRIMEFLIGHT','OK','2026-05-12'::date,'2026-05-30'::date,'Complete','Alfonso Hijuelos',NULL,NULL,NULL,NULL,NULL,NULL,'THC450SL','Aluminum Fabrication w/ Velcon Filter'),
+(2026,5,'T2592','T2592 - RF7KJ-ML-600 7,000 Gallon Jet Refueler','STOCK','OK','2026-05-20'::date,'2026-04-30'::date,'Complete','Adalberto Vega','HV607 6x4 7K Heavy','International','AT LATAM','AT LATAM','17788','2026-02-19'::date,'RF7KJ-ML-600','Jet 7K w/Lift'),
+(2026,5,'T4099','T4099 - BTT-6KLB-G Baggage Towing Tractor Gas Engine','STOCK','Diseño','2026-05-20'::date,'2026-04-30'::date,'Complete','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'BTT-6KLB-G','Baggage Towing Tractor Gas Engine (+) 6,000lb'),
+(2026,5,'T2849','T2849 - 1,000 Gallon Avgas Refueler @40GPM','STOCK','OK','2026-05-22'::date,'2026-05-30'::date,'Complete','Adalberto Vega','NPR-HD 4x2 Diesel Engine','Isuzu','AT LATAM','At Latam','00003','2026-04-18'::date,'RF1KA','Avgas 1K (+) 40GPM Blackmer (+) WFS specs (-) TCSHub4040P Modem (+) Black and Silver Wheels'),
+(2026,5,'T2472','T2472 - RF5KJ-300 5,000 Gallon Jet Refueler','STOCK','OK','2026-05-25'::date,'2026-06-30'::date,'Complete','Adalberto Vega','HV607 4x2 5K','International','AT LATAM','At Latam','17903','2026-03-02'::date,'RF5KJ-300','Jet 5K'),
+(2026,5,'T4245','T4245 - RS1400-2C-GD 1,400 Gallon Rampservicer','STOCK','OK','2026-05-25'::date,'2026-05-30'::date,'Complete','Alfonso Hijuelos','NRR 4x2 Gas Engine','Isuzu','AT LATAM','At Latam','00006','2026-04-13'::date,'RS1400-2C-GD','Rampservicer 1.4K'),
+(2026,5,'T2471','T2471 - RF5KJ-300 5,000 Gallon Jet Refueler','STOCK','OK','2026-05-30'::date,'2026-05-30'::date,'Complete','Adalberto Vega','M2-106 4x2','Freightliner','AT LATAM','At Latam','17783','2026-04-13'::date,'RF5KJ-300','Jet 5K'),
+(2026,5,'T4116','T4116 - TT40KLJ-ML-3028 40,000 Liter Articulating Jet A1 Refueler JIG','CONEX OIL & GAS','Diseño','2026-05-30'::date,'2026-01-30'::date,'Complete','Alfonso Hijuelos','T-Way AD380T43H-4500 AT','Iveco','At Latam','At Latam','18049','2026-05-20'::date,'TT40KLJ-ML-3028','Jet A1 40KL JIG Tractor Trailer (+) Lift (+) Liquid 5th wheel (+) Euro III'),
+(2026,5,'T4201','T4201 - FS300J 300GPM Jet Fixed Skid','STOCK','OK','2026-05-30'::date,'2026-05-30'::date,'Complete','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'FS300J','Jet 300GPM Fixed Skid'),
+(2026,5,'T4382','T4382 - LAV-T800 800 Gallon Aircraft Lavatory Service Truck','STOCK','OK','2026-05-30'::date,'2026-05-30'::date,'Complete','Alfonso Hijuelos','NPR-HD 4x2 Gas Engine','Isuzu','AT LATAM',NULL,NULL,NULL,'LAV-T800','800 Gallon Aircraft Lavatory Service Truck (+) Cold Weather Package'),
+(2026,5,'T4924','T4924','False','Diseño',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(2026,5,'T4923','T4923 - RF5KLA-185 5,000 Liter Avgas Refueler (JIG)','PACIFIC ENERGY FIJI','Diseño','2026-05-30'::date,'2026-05-02'::date,'In Progress','Adalberto Vega','NPR-75-190','Isuzu','AT LATAM','At Latam','00005','2026-05-13'::date,'RF5KLA-185','Avgas 5K JIG (+) Filter Facet VF21 (+) Recovery Tank 40Lit (+) Veeder-Root (+)  Internal Pneumatic SWD (+) Rochester or Bayham Mechanical Tank Contents Gauge (+) Single Low Point Sump and Drain Valve'),
+(2026,5,'T2719','T2719 - RF10KJ-800 10,000 Gallon Jet Refueler JIG','LEGENDSEA FUELS COMPANY','Chassis','2026-06-13'::date,'2026-06-16'::date,'In Progress','Alfonso Hijuelos','RF10RD-2-2C-T4-278"','EAM','At Latam','At Latam','17879','2026-05-13'::date,'RF10KJ-800','Jet 10K JIG Tier4 Double Cab (-) Chock Box (-) Rear Camera (-) Toolbox (+) Speed Limiter (+) AC Unit (+) Electronic tank level System (+) Overwing System (+) 60'' Fueling Hose (+) Metal Fenders'),
+(2026,5,'T2720','T2720 - RF10KJ-800 10,000 Gallon Jet Refueler JIG','LEGENDSEA FUELS COMPANY','Chassis','2026-06-15'::date,'2026-07-16'::date,'In Progress','Alfonso Hijuelos','RF10RD-2-2C-T4-278"','EAM','AT LATAM','At Latam','16853','2026-05-11'::date,'RF10KJ-800','Jet 10K JIG Tier4 Double Cab (-) Chock Box (-) Rear Camera (-) Toolbox (+) Speed Limiter (+) AC Unit (+) Electronic tank level System (+) Overwing System (+) 60'' Fueling Hose (+) Metal Fenders'),
+(2026,5,'T2729','T2729 - RF10KJ-800 10,000 Gallon Jet Refueler','GOVERNMENT OF NUNAVUT','Chassis','2026-06-15'::date,'2026-06-06'::date,'In Progress','Alfonso Hijuelos','RF10RD-2-1C-2F-T4-260"','EAM','AT LATAM','At Latam','16854','2026-05-11'::date,'RF10KJ-800','Jet 10K Tier4 Single Cab (+) 4.5m Lift (+) Standard Three Lug Adapter (+) Alarm levels: Low - High - High-high (+) Overwing Fueling: Overwing Reel (Multi) & Nozzle - TCS 700 Meter (+) Underwing Fueling: Underwing Reel (Multi) & Nozzle (+) AC unit (+) Cold Package'),
+(2026,5,'T4123','T4123 - 3400LPM Hydrant Dispenser Module (JIG Australia)','SKYTANKING','Diseño','2026-06-15'::date,'2026-05-15'::date,'In Progress','Alfonso Hijuelos',NULL,NULL,NULL,NULL,NULL,NULL,'HD3000L','2nd 800GPM Hydrant Dispenser Module for RHD chassis (JIG Australia) on Isuzu NPR 65-45-190 Diesel'),
+(2026,5,'T4124','T4124 - 3400LPM Hydrant Dispenser Module (JIG Australia)','SKYTANKING','Diseño','2026-06-15'::date,'2026-05-15'::date,'In Progress','Alfonso Hijuelos',NULL,NULL,NULL,NULL,NULL,NULL,'HD3000L','1st 800GPM Hydrant Dispenser Module for LHD chassis (JIG Australia) on Isuzu NPR 65-45-190 Diesel'),
+(2026,5,'T4947','T4947 - RF20KLJ-1135 20,000 Liter Jet Refueler JIG','AlBusaili Company','Tanque','2026-06-15'::date,'2026-05-27'::date,'In Progress','Alfonso Hijuelos','Atego 3133','Mercedes','AT LATAM','TBD to Latam','00019','2026-06-05'::date,'RF20KLJ-1135','JIG 20KL Jet Refueler (+) Specs to be confirmed'),
+(2026,5,'T2985','T2985','False','Cambio de requerimiento del cliente',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(2026,5,'T4948','T4948 - RF20KLJ-1135 20,000 Liter Jet Refueler JIG','AlBusaili Company','Tanque','2026-06-15'::date,'2026-05-27'::date,'In Progress','Alfonso Hijuelos','Atego 3133','Mercedes','AT LATAM','TBD to Latam','00020','2026-06-05'::date,'RF20KLJ-1135','JIG 20KL Jet Refueler (+) Specs to be confirmed'),
+(2026,5,'T2811','T2811 - RF3KJ-300 3,000 Gallon Jet Refueler','Texas Department of Transportation','Diseño','2026-06-22'::date,'2026-06-30'::date,'In Progress','Alfonso Hijuelos','F750 4x2 Diesel Engine','Ford','At Latam','At Latam','00013','2026-04-24'::date,'RF3KJ-300','Jet 3K (+) WFS specs (+) 2nd Overwing (+) Defuel (+) Backup Camera (+) Recovery Tank (+) Additive System (+) TCS3000 (+) Modem Wiring (-) Modem'),
+(2026,5,'T4383','T4383 - LAV-T800 800 Gallon Aircraft Lavatory Service Truck','STOCK','False','2026-06-22'::date,'2026-06-30'::date,'In Progress','Alfonso Hijuelos','NPR-HD 4x2 Gas Engine','Isuzu','AT LATAM',NULL,NULL,NULL,'LAV-T800','800 Gallon Aircraft Lavatory Service Truck (+) Cold Weather Package'),
+(2026,5,'C0340','C0340 - Control System for T1463','Aviation Fuel & Logistics Solutions','False','2026-06-23'::date,'2026-06-23'::date,NULL,'Alfonso Hijuelos',NULL,NULL,NULL,NULL,NULL,NULL,'Spare Parts','Spare Parts for T1463'),
+(2026,5,'T3010','T3010 - Test Rig Cart','WFS','Diseño','2026-06-25'::date,'2026-06-25'::date,'Not Started','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'Test Rig Cart','New Test Rig Trolley (JIG)'),
+(2026,5,'T4949','T4949 - RF20KLJ-1135 20,000 Liter Jet Refueler JIG','AlBusaili Company',NULL,'2026-06-26'::date,'2026-06-26'::date,'In Progress','Alfonso Hijuelos','Atego 3133','Mercedes','AT LATAM','TBD to Latam','00021','2026-06-05'::date,'RF20KLJ-1135','JIG 20KL Jet Refueler (+) Specs to be confirmed'),
+(2026,5,'T2721','T2721 - RF10KJ-800 10,000 Gallon Jet Refueler JIG','LEGENDSEA FUELS COMPANY',NULL,'2026-06-30'::date,'2026-07-16'::date,'In Progress','Alfonso Hijuelos','RF10RD-2-2C-T4-278"','EAM','At Latam','At Latam','17883','2026-05-21'::date,'RF10KJ-800','Jet 10K JIG Tier4 Double Cab (-) Chock Box (-) Rear Camera (-) Toolbox (+) Speed Limiter (+) AC Unit (+) Electronic tank level System (+) Overwing System (+) 60'' Fueling Hose (+) Metal Fenders'),
+(2026,5,'T4243','T4243 - MD100J 100GPM Module for Jet Refueler','GEMILANG VESSEL ENGINEERING SDN BHD',NULL,'2026-06-30'::date,'2026-05-07'::date,'In Progress','Alfonso Hijuelos',NULL,NULL,NULL,NULL,NULL,NULL,'MD100J','Jet A1 100GPM Module, piping and tank accessories (+) Pre-wired electrical Juction Box (+) (JIG) Visual Sampler W/ Led Lighting, Deadman timer W/ Light control, Interlock system (+) Deadman Timer (+) Spare Parts on a Quester CDE62TR08MJ 6x2 Rigid'),
+(2026,5,'C0328','C0328 - (4) Relaxation Chamber 150 Gallons for Skids','PRIMEFLIGHT',NULL,'2026-06-30'::date,'2026-05-30'::date,'Not Started','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'METAL PARTS','(4) Relaxation Chamber 150 Gallons'),
+(2026,5,'T4727A','T4727A - MD300J 300GPM Jet Module for RF5KJ-300','TK&K SERVICES',NULL,'2026-06-30'::date,'2026-09-25'::date,'Not Started','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'MD300J','Jet 300GPM (Mid) Module, piping and tank accessories (+) Defuel (+) Speed Limiter 20MPH (+) D3 Military Nozzle (+) 60'' Hose (+) Cat M (+) Over the Road'),
+(2026,5,'T4951A','T4951A - MD300J 300GPM Jet A1 Module for RF20KLJ-300','Mack Defense',NULL,'2026-06-30'::date,'2026-10-30'::date,'Not Started','Adalberto Vega',NULL,NULL,NULL,NULL,NULL,NULL,'MD300J',NULL),
+(2026,5,'T4951B','T4951B - Tank 20,000 Liter','Mack Defense',NULL,'2026-06-30'::date,'2026-10-30'::date,'Not Started','Adalberto Vega',NULL,NULL,NULL,'Pending','Pending',NULL,'Tank','20K Tank'),
+(2026,4,'T4946','T4946 - RF20KLJ-1135 20,000 Liter Jet Refueler JIG','ALBUSAILI COMPANY','Chassis','2026-04-30'::date,'2026-04-27'::date,NULL,NULL,'Atego 3133 6x4','Mercedes','At Latam','At Latam','16387.0','2026-03-11'::date,NULL,'JIG 20KL Jet Refueler (+) Specs to be confirmed'),
+(2026,4,'T2731','T2731 - RF10KJ-800 10,000 Gallon Jet Refueler','PRIMEFLIGHT','Chassis','2026-04-30'::date,'2026-07-30'::date,NULL,NULL,'RF10RD-2-2C-T4-278"','EAM','At Latam','At Latam','16852.0','2026-04-13'::date,NULL,'Jet 10K Tier4 Single Cab'),
+(2026,4,'T2471','T2471 - RF5KJ-300 5,000 Gallon Jet Refueler','STOCK','Chassis','2026-04-25'::date,'2026-05-30'::date,NULL,NULL,'M2-106 4X2','Freightliner','At Latam','At Latam','17783.0','2026-04-13'::date,NULL,'Jet 5K'),
+(2026,4,'T4311','T4311 - THC450SL 450GPM Towable Hydrant Cart (JIG)','FLEX FUEL INC','Definiciones del cliente','2026-04-24'::date,'2026-05-16'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Aluminum Fabrication w/ To confirm the Filter Type JIG (+) Veeder Root (+) Overwing System (+) Rim 13" Wheels (+) Set of filter Elements'),
+(2026,4,'T2592','T2592 - RF7KJ-ML-600 7,000 Gallon Jet Refueler','STOCK','Definiciones del cliente','2026-04-30'::date,'2026-04-30'::date,NULL,NULL,'HV607 6x4 7K Heavy','International','At Latam','At Latam','17788.0','2026-02-19'::date,NULL,'Jet 7K w/Lift'),
+(2026,4,'T4242','T4242 - MD100J 100GPM Module for Jet Refueler','GEMILANG VESSEL ENGINEERING SDN BHD','Diseño','2026-04-30'::date,'2026-05-07'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Jet A1 100GPM Module, piping and tank accessories (+) Pre-wired electrical Juction Box (+) (JIG) Visual Sampler W/ Led Lighting, Deadman timer W/ Light control, Interlock system (+) Deadman Timer (+) Spare Parts on a Quester CDE62TR08MJ 6x2 Rigid'),
+(2026,4,'T4924','T4924 - 800GPM Hydrant Dispenser (JIG)','PACIFIC ENERGY FIJI','Diseño','2026-04-30'::date,'2026-05-30'::date,NULL,NULL,'NPR 65-45-190 Diesel','Isuzu','At Latam',NULL,NULL,NULL,NULL,'800GPM Hydrant Dispenser (+) JIG Compliant (+) 4.5 Lift (+) Mechanical Register (+) Wrap Around (+) Inlet Crocodile (+) Pneumatic SWD Fitting'),
+(2026,4,'T4199','T4199 - FS300J 300GPM Jet Fixed Skid','STOCK','Faltantes','2026-04-30'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Jet 300GPM Fixed Skid'),
+(2026,4,'T4200','T4200 - FS300J 300GPM Jet Fixed Skid','STOCK','Faltantes','2026-04-30'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Jet 300GPM Fixed Skid'),
+(2026,4,'T4914','T4914 - RS3000-2C-GD 3,000 Gallon Rampservicer','STOCK','OK','2026-04-15'::date,'2026-04-30'::date,NULL,NULL,'F750 4x2 Gas Engine','Ford','At Latam','At Latam','17778.0','2026-03-02'::date,NULL,'Rampservicer 3K (+) WFS specs (+) RFID system (+) Black and Silver Wheels'),
+(2026,4,'T4732','T4732A - MD300J 300GPM Jet Module for RF5KJ-300','STOCK','OK','2026-04-15'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Jet 300GPM (Mid) Module, piping and tank accessories (+) STD Specs ProFlo Latam (+) SS piping (+) Updates from Garsite KC feedback'),
+(2026,4,'T4733','T4733A - MD300J 300GPM Jet Module for RF5KJ-300','STOCK','OK','2026-04-15'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Jet 300GPM (Mid) Module, piping and tank accessories (+) STD Specs ProFlo Latam (+) SS piping (+) Updates from Garsite KC feedback'),
+(2026,4,'T4773','T4773 - Bob Tail on F450','STOCK','OK','2026-04-30'::date,'2026-04-30'::date,NULL,NULL,'F450 4x2 Gas Engine','Ford','At Latam',NULL,NULL,NULL,NULL,'Bob Tail on F450'),
+(2026,4,'T2843','T2843 - 1,000 Gallon Avgas Refueler @40GPM','STOCK','OK','2026-04-30'::date,'2026-04-30'::date,NULL,NULL,'NPR-HD 4x2 Gas Engine','Isuzu','At Latam','At Latam','16900.0','2026-02-28'::date,NULL,'Avgas 1K'),
+(2026,4,'T4630','T4630 - THC450SL 450GPM Towable Hydrant Cart','PRIMEFLIGHT','OK','2026-04-15'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Aluminum Fabrication w/ Velcon Filter'),
+(2026,4,'T4631','T4631 - THC450SL 450GPM Towable Hydrant Cart','PRIMEFLIGHT','OK','2026-04-15'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Aluminum Fabrication w/ Velcon Filter'),
+(2026,4,'T4632','T4632 - THC450SL 450GPM Towable Hydrant Cart','PRIMEFLIGHT','OK','2026-04-15'::date,'2026-04-30'::date,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Aluminum Fabrication w/ Velcon Filter'),
+(2026,4,'T4164','T4164 - 800GPM Hydrant Dispenser','SIGNATURE AVIATION','OK','2026-04-30'::date,'2026-05-06'::date,NULL,NULL,'NPR-HD 4x2 Diesel Engine','Isuzu','At Latam',NULL,NULL,NULL,NULL,'800GPM Hydrant Dispenser'),
+(2026,4,'T4116','T4116 - TT40KLJ-ML-3028 40,000 Liter Articulating Jet A1 Refueler JIG','CONEX OIL & GAS','Tanque','2026-04-30'::date,'2026-01-30'::date,NULL,NULL,'T-Way AD380T43H-4500 AT','Iveco','At Latam','TBD to Latam','18049.0','2026-04-30'::date,NULL,'Jet A1 40KL JIG Tractor Trailer (+) Lift (+) Liquid 5th wheel (+) Euro III')
+ON CONFLICT (anio,mes,project_id) DO NOTHING;

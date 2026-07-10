@@ -112,6 +112,81 @@ export type Database = {
         }
         Relationships: []
       }
+      proyectos_seguimiento: {
+        Row: {
+          anio: number
+          chassis_brand: string | null
+          chassis_model: string | null
+          chassis_status: string | null
+          created_at: string
+          created_by: string | null
+          customer: string | null
+          highlights: string | null
+          id: string
+          l5_model: string | null
+          mes: number
+          motivo: string | null
+          production_end_date: string | null
+          project_id: string
+          project_manager: string | null
+          project_name: string | null
+          project_status: string | null
+          promise_date: string | null
+          tank_date_delivery: string | null
+          tank_status: string | null
+          tank_vin: string | null
+          updated_at: string
+        }
+        Insert: {
+          anio: number
+          chassis_brand?: string | null
+          chassis_model?: string | null
+          chassis_status?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer?: string | null
+          highlights?: string | null
+          id?: string
+          l5_model?: string | null
+          mes: number
+          motivo?: string | null
+          production_end_date?: string | null
+          project_id: string
+          project_manager?: string | null
+          project_name?: string | null
+          project_status?: string | null
+          promise_date?: string | null
+          tank_date_delivery?: string | null
+          tank_status?: string | null
+          tank_vin?: string | null
+          updated_at?: string
+        }
+        Update: {
+          anio?: number
+          chassis_brand?: string | null
+          chassis_model?: string | null
+          chassis_status?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer?: string | null
+          highlights?: string | null
+          id?: string
+          l5_model?: string | null
+          mes?: number
+          motivo?: string | null
+          production_end_date?: string | null
+          project_id?: string
+          project_manager?: string | null
+          project_name?: string | null
+          project_status?: string | null
+          promise_date?: string | null
+          tank_date_delivery?: string | null
+          tank_status?: string | null
+          tank_vin?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
