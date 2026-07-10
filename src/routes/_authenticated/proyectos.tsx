@@ -110,10 +110,10 @@ function ProyectosPage() {
     mutationFn: async (input: Partial<Proyecto> & { anio: number; mes: number; project_id: string }) => {
       const payload = { ...input };
       if (editing?.id) {
-        const { error } = await supabase.from("proyectos_seguimiento" as never).update(payload).eq("id", editing.id);
+        const { error } = await (supabase as any).from("proyectos_seguimiento").update(payload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("proyectos_seguimiento" as never).insert(payload);
+        const { error } = await (supabase as any).from("proyectos_seguimiento").insert(payload);
         if (error) throw error;
       }
     },
@@ -128,7 +128,7 @@ function ProyectosPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("proyectos_seguimiento" as never).delete().eq("id", id);
+      const { error } = await (supabase as any).from("proyectos_seguimiento").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
