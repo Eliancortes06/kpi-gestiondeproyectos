@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/proyectos", label: "Proyectos", icon: Package },
   { to: "/indicadores", label: "Gestión de Indicadores", icon: ClipboardList },
   { to: "/reportes", label: "Reportes", icon: FileBarChart2 },
   { to: "/admin", label: "Administración", icon: Settings2, adminOnly: true },
