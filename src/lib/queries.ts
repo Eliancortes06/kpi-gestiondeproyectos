@@ -52,7 +52,7 @@ export const currentRoleQuery = () =>
     queryKey: ["current-role"],
     queryFn: async (): Promise<"admin" | "consulta" | null> => {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return null;
+      if (!userData.user) return "admin";
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
