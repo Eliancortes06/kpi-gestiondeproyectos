@@ -1,19 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
-  Area, AreaChart, Bar, BarChart, Cell, CartesianGrid, Legend,
+  Bar, BarChart, Cell, CartesianGrid, Legend,
   Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileImage } from "lucide-react";
-import { indicadoresQuery, motivosQuery } from "@/lib/queries";
-import { buildSeriesByMotivo, enrich, lastNMonths, uniquePeriods } from "@/lib/analytics";
-import { MONTH_SHORT_ES, periodLabel } from "@/lib/periods";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { indicadoresQuery, motivosQuery, type Motivo } from "@/lib/queries";
+import { buildSeriesByMotivo, enrich, uniquePeriods } from "@/lib/analytics";
+import { MONTH_SHORT_ES, MONTH_NAMES_ES, periodLabel } from "@/lib/periods";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { DEFAULT_FILTERS, FiltersBar, type Filters } from "@/components/dashboard/FiltersBar";
-import { exportElementToPDF, exportElementToPNG } from "@/lib/exports";
+import { exportElementToPDF } from "@/lib/exports";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -28,6 +32,7 @@ function DashboardPage() {
   const { data: motivos } = useSuspenseQuery(motivosQuery());
   const { data: indicadores } = useSuspenseQuery(indicadoresQuery());
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [selectedMotivo, setSelectedMotivo] = useState<Motivo | null>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
 
   const allPeriods = useMemo(() => uniquePeriods(indicadores), [indicadores]);
@@ -36,24 +41,14 @@ function DashboardPage() {
     [allPeriods],
   );
 
-  const rangeRows = useMemo(() => {
-    if (filters.range === "6m") return lastNMonths(indicadores, 6);
-    if (filters.range === "12m") return lastNMonths(indicadores, 12);
-    if (filters.range === "year") {
-      const currentYear = allPeriods.length ? allPeriods[allPeriods.length - 1].anio : new Date().getFullYear();
-      return indicadores.filter((r) => r.anio === currentYear);
-    }
-    return indicadores;
-  }, [indicadores, filters.range, allPeriods]);
-
   const filteredRows = useMemo(() => {
-    return rangeRows.filter((r) => {
+    return indicadores.filter((r) => {
       if (filters.anio !== "all" && String(r.anio) !== filters.anio) return false;
       if (filters.mes !== "all" && String(r.mes) !== filters.mes) return false;
       if (filters.motivoId !== "all" && r.motivo_id !== filters.motivoId) return false;
       return true;
     });
-  }, [rangeRows, filters]);
+  }, [indicadores, filters]);
 
   const periods = useMemo(() => uniquePeriods(filteredRows), [filteredRows]);
   const enriched = useMemo(() => enrich(filteredRows, motivos), [filteredRows, motivos]);
@@ -96,13 +91,6 @@ function DashboardPage() {
       .sort((a, b) => a.mes - b.mes);
   }, [periods, motivos, enriched]);
 
-  async function handleExportPNG() {
-    if (!chartsRef.current) return;
-    try {
-      await exportElementToPNG(chartsRef.current, `dashboard-${Date.now()}.png`);
-      toast.success("Imagen exportada");
-    } catch { toast.error("No se pudo exportar"); }
-  }
   async function handleExportPDF() {
     if (!chartsRef.current) return;
     try {
@@ -123,7 +111,6 @@ function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportPNG}><FileImage className="mr-2 h-4 w-4" />PNG</Button>
           <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="mr-2 h-4 w-4" />PDF</Button>
         </div>
       </header>
@@ -145,6 +132,7 @@ function DashboardPage() {
               color={m.color}
               sparkline={series}
               lowerIsBetter={!isOk}
+              onClick={() => setSelectedMotivo(m)}
             />
           );
         })}
@@ -196,60 +184,29 @@ function DashboardPage() {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <Card className="card-elevated p-5">
-            <h3 className="text-lg font-semibold tracking-tight">Tendencia de cumplimiento (On Time)</h3>
-            <p className="text-sm text-muted-foreground">Porcentaje de proyectos entregados a tiempo por mes.</p>
-            <div className="mt-4 h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={periods.map((p) => {
-                    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "on time");
-                    const s = okMotivo ? seriesByMotivo[okMotivo.id]?.find((x) => x.anio === p.anio && x.mes === p.mes) : null;
-                    return { label: periodLabel(p.anio, p.mes), "On Time": s?.value ?? 0 };
-                  })}
-                  margin={{ top: 8, right: 16, bottom: 8, left: -8 }}
-                >
-                  <defs>
-                    <linearGradient id="okgrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22c55e" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
-                  <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} unit="%" domain={[0, 100]} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, "On Time"]} />
-                  <Area type="monotone" dataKey="On Time" stroke="#22c55e" strokeWidth={2.5} fill="url(#okgrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-
-          <Card className="card-elevated p-5">
-            <h3 className="text-lg font-semibold tracking-tight">Top causas de retraso</h3>
-            <p className="text-sm text-muted-foreground">Promedio en el periodo seleccionado.</p>
-            <div className="mt-4 h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  layout="vertical"
-                  data={pieData.map((d) => ({ nombre: d.name, avg: d.value, color: d.color }))}
-                  margin={{ top: 8, right: 24, bottom: 8, left: 16 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 12 }} unit="%" />
-                  <YAxis type="category" dataKey="nombre" tick={{ fontSize: 12 }} width={140} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)}%`, "Promedio"]} />
-                  <Bar dataKey="avg" radius={[0, 6, 6, 0]}>
-                    {pieData.map((d) => (
-                      <Cell key={d.name} fill={d.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        </div>
+        <Card className="card-elevated p-5">
+          <h3 className="text-lg font-semibold tracking-tight">Top causas de retraso</h3>
+          <p className="text-sm text-muted-foreground">Promedio en el periodo seleccionado.</p>
+          <div className="mt-4 h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                layout="vertical"
+                data={pieData.map((d) => ({ nombre: d.name, avg: d.value, color: d.color }))}
+                margin={{ top: 8, right: 24, bottom: 8, left: 16 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 12 }} unit="%" />
+                <YAxis type="category" dataKey="nombre" tick={{ fontSize: 12 }} width={140} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)}%`, "Promedio"]} />
+                <Bar dataKey="avg" radius={[0, 6, 6, 0]}>
+                  {pieData.map((d) => (
+                    <Cell key={d.name} fill={d.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
 
         <Card className="card-elevated p-5">
           <h3 className="text-lg font-semibold tracking-tight">Comparativo por año</h3>
@@ -277,7 +234,138 @@ function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      <MotivoProjectsDialog
+        motivo={selectedMotivo}
+        onClose={() => setSelectedMotivo(null)}
+        filters={filters}
+      />
     </div>
+  );
+}
+
+type ProyectoRow = {
+  id: string;
+  anio: number;
+  mes: number;
+  project_id: string;
+  project_name: string | null;
+  customer: string | null;
+  motivo: string | null;
+  project_status: string | null;
+  project_manager: string | null;
+  promise_date: string | null;
+};
+
+function MotivoProjectsDialog({
+  motivo,
+  onClose,
+  filters,
+}: {
+  motivo: Motivo | null;
+  onClose: () => void;
+  filters: Filters;
+}) {
+  const open = motivo != null;
+  const isOnTime = motivo?.nombre.toLowerCase() === "on time";
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio, filters.mes],
+    enabled: open,
+    queryFn: async (): Promise<ProyectoRow[]> => {
+      let q = (supabase as any)
+        .from("proyectos_seguimiento")
+        .select("id,anio,mes,project_id,project_name,customer,motivo,project_status,project_manager,promise_date")
+        .order("anio", { ascending: false })
+        .order("mes", { ascending: false })
+        .order("project_id", { ascending: true });
+
+      if (motivo) {
+        // Match by motivo name (case-insensitive). "On Time" motivo may be stored as "OK" or "On Time".
+        if (isOnTime) {
+          q = q.or("motivo.ilike.on time,motivo.ilike.ok");
+        } else {
+          q = q.ilike("motivo", motivo.nombre);
+        }
+      }
+      if (filters.anio !== "all") q = q.eq("anio", Number(filters.anio));
+      if (filters.mes !== "all") q = q.eq("mes", Number(filters.mes));
+
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as ProyectoRow[];
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{ background: motivo?.color ?? "#888" }}
+            />
+            {isOnTime ? "Proyectos entregados a tiempo" : `Proyectos afectados: ${motivo?.nombre ?? ""}`}
+          </DialogTitle>
+          <DialogDescription>
+            {filters.anio !== "all" || filters.mes !== "all"
+              ? `Filtro: ${filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] + " " : ""}${filters.anio !== "all" ? filters.anio : "todos los años"}`
+              : "Todos los periodos"}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-auto border rounded-md">
+          {isLoading ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">Cargando...</div>
+          ) : !data || data.length === 0 ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              No hay proyectos registrados para este motivo.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead>Periodo</TableHead>
+                  <TableHead>Proyecto</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Responsable</TableHead>
+                  <TableHead>Fecha promesa</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {MONTH_SHORT_ES[r.mes - 1]} {r.anio}
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{r.project_id}</div>
+                      {r.project_name && (
+                        <div className="text-xs text-muted-foreground">{r.project_name}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm">{r.customer ?? "—"}</TableCell>
+                    <TableCell>
+                      {r.project_status ? (
+                        <Badge variant="outline" className="text-xs">{r.project_status}</Badge>
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell className="text-sm">{r.project_manager ?? "—"}</TableCell>
+                    <TableCell className="text-sm whitespace-nowrap">{r.promise_date ?? "—"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        <div className="text-xs text-muted-foreground pt-2">
+          {data ? `${data.length} proyecto(s)` : ""}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
