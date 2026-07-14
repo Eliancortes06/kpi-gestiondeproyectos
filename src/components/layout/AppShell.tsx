@@ -1,23 +1,18 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { currentRoleQuery, profileQuery } from "@/lib/queries";
+import { currentRoleQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   ClipboardList,
   FileBarChart2,
   Settings2,
-  LogOut,
   Menu,
   X,
-  ShieldCheck,
   Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 type NavItem = {
   to: string;
