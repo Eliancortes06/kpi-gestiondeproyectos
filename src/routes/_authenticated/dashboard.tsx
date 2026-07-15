@@ -139,7 +139,7 @@ function DashboardPage() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold tracking-tight">Distribución de causas de retraso</h2>
-              <p className="text-sm text-muted-foreground">Participación promedio por motivo en el periodo (excluye On Time).</p>
+
             </div>
           </div>
           <div className="h-[420px]">
