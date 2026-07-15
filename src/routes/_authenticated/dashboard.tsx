@@ -105,10 +105,6 @@ function DashboardPage() {
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-primary">Dashboard Ejecutivo</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Diagnostico de retrasos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {latest ? `Último periodo: ${periodLabel(latest.anio, latest.mes, false)}` : "Sin datos"}
-            {previous ? ` · comparado con ${periodLabel(previous.anio, previous.mes, false)}` : ""}
-          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="mr-2 h-4 w-4" />PDF</Button>
