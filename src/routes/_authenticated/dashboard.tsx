@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import {
-  Bar, BarChart, Cell, CartesianGrid, Legend,
-  Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Bar, BarChart, Cell, CartesianGrid,
+  Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend,
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,23 +73,6 @@ function DashboardPage() {
       .sort((a, b) => b.value - a.value);
   }, [motivos, seriesByMotivo]);
 
-  const yearCompareData = useMemo(() => {
-    const byMonth: Record<number, Record<string, number>> = {};
-    for (const p of periods) byMonth[p.mes] = byMonth[p.mes] ?? {};
-    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "on time");
-    for (const p of periods) {
-      const ok = enriched.find((r) => r.anio === p.anio && r.mes === p.mes && r.motivo_id === okMotivo?.id);
-      byMonth[p.mes] = byMonth[p.mes] ?? {};
-      byMonth[p.mes][String(p.anio)] = ok?.porcentaje ?? 0;
-    }
-    return Object.keys(byMonth)
-      .map((m) => ({
-        label: MONTH_SHORT_ES[Number(m) - 1],
-        mes: Number(m),
-        ...byMonth[Number(m)],
-      }))
-      .sort((a, b) => a.mes - b.mes);
-  }, [periods, motivos, enriched]);
 
   async function handleExportPDF() {
     if (!chartsRef.current) return;
@@ -105,10 +88,6 @@ function DashboardPage() {
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-primary">Dashboard Ejecutivo</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Diagnostico de retrasos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {latest ? `Último periodo: ${periodLabel(latest.anio, latest.mes, false)}` : "Sin datos"}
-            {previous ? ` · comparado con ${periodLabel(previous.anio, previous.mes, false)}` : ""}
-          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="mr-2 h-4 w-4" />PDF</Button>
@@ -143,7 +122,7 @@ function DashboardPage() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold tracking-tight">Distribución de causas de retraso</h2>
-              <p className="text-sm text-muted-foreground">Participación promedio por motivo en el periodo (excluye On Time).</p>
+
             </div>
           </div>
           <div className="h-[420px]">
@@ -208,31 +187,6 @@ function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="card-elevated p-5">
-          <h3 className="text-lg font-semibold tracking-tight">Comparativo por año</h3>
-          <p className="text-sm text-muted-foreground">Cumplimiento (On Time) mes a mes.</p>
-          <div className="mt-4 h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={yearCompareData} margin={{ top: 8, right: 16, bottom: 8, left: -8 }}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} unit="%" />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, ""]} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {years.map((y, i) => (
-                  <Line
-                    key={y}
-                    type="monotone"
-                    dataKey={String(y)}
-                    stroke={["#1F3F5E", "#79161D", "#c9a84c", "#22c55e"][i % 4]}
-                    strokeWidth={2.5}
-                    dot={{ r: 3 }}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
       </div>
 
       <MotivoProjectsDialog

@@ -12,12 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
 import { Route as AuthenticatedProyectosRouteImport } from './routes/_authenticated/proyectos'
-import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedIndicadoresRouteImport } from './routes/_authenticated/indicadores'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedCargaRouteImport } from './routes/_authenticated/carga'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -33,19 +31,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedReportesRoute = AuthenticatedReportesRouteImport.update({
-  id: '/reportes',
-  path: '/reportes',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedProyectosRoute = AuthenticatedProyectosRouteImport.update({
   id: '/proyectos',
   path: '/proyectos',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedIndicadoresRoute =
@@ -59,76 +47,58 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AuthenticatedCargaRoute = AuthenticatedCargaRouteImport.update({
+  id: '/carga',
+  path: '/carga',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/carga': typeof AuthenticatedCargaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/indicadores': typeof AuthenticatedIndicadoresRoute
-  '/insights': typeof AuthenticatedInsightsRoute
   '/proyectos': typeof AuthenticatedProyectosRoute
-  '/reportes': typeof AuthenticatedReportesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/carga': typeof AuthenticatedCargaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/indicadores': typeof AuthenticatedIndicadoresRoute
-  '/insights': typeof AuthenticatedInsightsRoute
   '/proyectos': typeof AuthenticatedProyectosRoute
-  '/reportes': typeof AuthenticatedReportesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/carga': typeof AuthenticatedCargaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/indicadores': typeof AuthenticatedIndicadoresRoute
-  '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/proyectos': typeof AuthenticatedProyectosRoute
-  '/_authenticated/reportes': typeof AuthenticatedReportesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/admin'
+    | '/carga'
     | '/dashboard'
     | '/indicadores'
-    | '/insights'
     | '/proyectos'
-    | '/reportes'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/auth'
-    | '/admin'
-    | '/dashboard'
-    | '/indicadores'
-    | '/insights'
-    | '/proyectos'
-    | '/reportes'
+  to: '/' | '/auth' | '/carga' | '/dashboard' | '/indicadores' | '/proyectos'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/admin'
+    | '/_authenticated/carga'
     | '/_authenticated/dashboard'
     | '/_authenticated/indicadores'
-    | '/_authenticated/insights'
     | '/_authenticated/proyectos'
-    | '/_authenticated/reportes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,25 +130,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/reportes': {
-      id: '/_authenticated/reportes'
-      path: '/reportes'
-      fullPath: '/reportes'
-      preLoaderRoute: typeof AuthenticatedReportesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/proyectos': {
       id: '/_authenticated/proyectos'
       path: '/proyectos'
       fullPath: '/proyectos'
       preLoaderRoute: typeof AuthenticatedProyectosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/insights': {
-      id: '/_authenticated/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/indicadores': {
@@ -195,32 +151,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+    '/_authenticated/carga': {
+      id: '/_authenticated/carga'
+      path: '/carga'
+      fullPath: '/carga'
+      preLoaderRoute: typeof AuthenticatedCargaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCargaRoute: typeof AuthenticatedCargaRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIndicadoresRoute: typeof AuthenticatedIndicadoresRoute
-  AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedProyectosRoute: typeof AuthenticatedProyectosRoute
-  AuthenticatedReportesRoute: typeof AuthenticatedReportesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCargaRoute: AuthenticatedCargaRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIndicadoresRoute: AuthenticatedIndicadoresRoute,
-  AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedProyectosRoute: AuthenticatedProyectosRoute,
-  AuthenticatedReportesRoute: AuthenticatedReportesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
