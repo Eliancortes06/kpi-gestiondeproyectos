@@ -73,23 +73,6 @@ function DashboardPage() {
       .sort((a, b) => b.value - a.value);
   }, [motivos, seriesByMotivo]);
 
-  const yearCompareData = useMemo(() => {
-    const byMonth: Record<number, Record<string, number>> = {};
-    for (const p of periods) byMonth[p.mes] = byMonth[p.mes] ?? {};
-    const okMotivo = motivos.find((m) => m.nombre.toLowerCase() === "on time");
-    for (const p of periods) {
-      const ok = enriched.find((r) => r.anio === p.anio && r.mes === p.mes && r.motivo_id === okMotivo?.id);
-      byMonth[p.mes] = byMonth[p.mes] ?? {};
-      byMonth[p.mes][String(p.anio)] = ok?.porcentaje ?? 0;
-    }
-    return Object.keys(byMonth)
-      .map((m) => ({
-        label: MONTH_SHORT_ES[Number(m) - 1],
-        mes: Number(m),
-        ...byMonth[Number(m)],
-      }))
-      .sort((a, b) => a.mes - b.mes);
-  }, [periods, motivos, enriched]);
 
   async function handleExportPDF() {
     if (!chartsRef.current) return;
