@@ -204,31 +204,6 @@ function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="card-elevated p-5">
-          <h3 className="text-lg font-semibold tracking-tight">Comparativo por año</h3>
-          <p className="text-sm text-muted-foreground">Cumplimiento (On Time) mes a mes.</p>
-          <div className="mt-4 h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={yearCompareData} margin={{ top: 8, right: 16, bottom: 8, left: -8 }}>
-                <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} unit="%" />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, ""]} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {years.map((y, i) => (
-                  <Line
-                    key={y}
-                    type="monotone"
-                    dataKey={String(y)}
-                    stroke={["#1F3F5E", "#79161D", "#c9a84c", "#22c55e"][i % 4]}
-                    strokeWidth={2.5}
-                    dot={{ r: 3 }}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
       </div>
 
       <MotivoProjectsDialog
