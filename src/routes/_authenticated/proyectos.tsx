@@ -85,19 +85,34 @@ function ProyectosPage() {
   const { data: proyectos = [], isLoading } = useProyectos();
 
   const [search, setSearch] = useState("");
+  const [filterAnio, setFilterAnio] = useState<string>("all");
+  const [filterMes, setFilterMes] = useState<string>("all");
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Proyecto | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Proyecto | null>(null);
 
+  const years = useMemo(
+    () => [...new Set(proyectos.map((p) => p.anio))].sort((a, b) => b - a),
+    [proyectos],
+  );
+
+  const filteredByPeriod = useMemo(() => {
+    return proyectos.filter((p) => {
+      if (filterAnio !== "all" && String(p.anio) !== filterAnio) return false;
+      if (filterMes !== "all" && String(p.mes) !== filterMes) return false;
+      return true;
+    });
+  }, [proyectos, filterAnio, filterMes]);
+
   const results = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return [] as Proyecto[];
-    return proyectos.filter((p) =>
+    return filteredByPeriod.filter((p) =>
       p.project_id.toLowerCase().includes(q) ||
       (p.project_name ?? "").toLowerCase().includes(q) ||
       (p.customer ?? "").toLowerCase().includes(q),
     );
-  }, [proyectos, search]);
+  }, [filteredByPeriod, search]);
 
   // Agrupar por project_id para ver evolución de motivos
   const grouped = useMemo(() => {
@@ -112,6 +127,13 @@ function ProyectosPage() {
       rows: rows.sort((a, b) => (b.anio - a.anio) || (b.mes - a.mes)),
     }));
   }, [results]);
+
+  const gridRows = useMemo(
+    () => [...filteredByPeriod].sort(
+      (a, b) => (b.anio - a.anio) || (b.mes - a.mes) || a.project_id.localeCompare(b.project_id),
+    ),
+    [filteredByPeriod],
+  );
 
   const saveMutation = useMutation({
     mutationFn: async (input: Partial<Proyecto> & { anio: number; mes: number; project_id: string }) => {
@@ -162,54 +184,145 @@ function ProyectosPage() {
         )}
       </header>
 
-      <Card className="card-elevated p-5">
+      <Card className="card-elevated p-5 space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            autoFocus
             className="pl-10 h-12 text-base"
             placeholder="Buscar proyecto por código, nombre o cliente…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {isLoading ? "Cargando…" : `${proyectos.length} proyectos en el sistema`}
-          {search && ` · ${grouped.length} resultado${grouped.length !== 1 ? "s" : ""}`}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:max-w-lg">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Año</Label>
+            <Select value={filterAnio} onValueChange={setFilterAnio}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {years.map((y) => (<SelectItem key={y} value={String(y)}>{y}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Mes</Label>
+            <Select value={filterMes} onValueChange={setFilterMes}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {MONTH_NAMES_ES.map((n, i) => (
+                  <SelectItem key={i} value={String(i + 1)}>{n}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {isLoading ? "Cargando…" : `${proyectos.length} proyectos en el sistema · ${gridRows.length} en el filtro actual`}
+          {search && ` · ${grouped.length} coincidencia${grouped.length !== 1 ? "s" : ""}`}
         </p>
       </Card>
 
-      {search.trim() === "" ? (
-        <Card className="card-elevated p-10">
-          <div className="mx-auto flex max-w-md flex-col items-center gap-3 text-center">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-              <Package className="h-6 w-6" />
-            </div>
-            <h2 className="text-xl font-semibold">Ingresa un código de proyecto</h2>
-            <p className="text-sm text-muted-foreground">
-              Por ejemplo <span className="font-mono font-semibold">T4566</span>, y verás su histórico
-              de motivos de retraso, fechas prometidas y estado por mes.
+      {search.trim() !== "" && (
+        grouped.length === 0 ? (
+          <Card className="card-elevated p-10 text-center">
+            <p className="text-sm text-muted-foreground">Sin resultados para "{search}".</p>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {grouped.map((g) => (
+              <ProjectCard
+                key={g.project_id}
+                projectId={g.project_id}
+                rows={g.rows}
+                canEdit={canEdit}
+                onEdit={(p) => { setEditing(p); setOpenForm(true); }}
+                onDelete={(p) => setConfirmDelete(p)}
+              />
+            ))}
+          </div>
+        )
+      )}
+
+      <Card className="card-elevated overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/30 px-5 py-3">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight">Todos los proyectos</h2>
+            <p className="text-xs text-muted-foreground">
+              {gridRows.length} registro{gridRows.length !== 1 ? "s" : ""}
+              {(filterAnio !== "all" || filterMes !== "all") && " (filtrado)"}
             </p>
           </div>
-        </Card>
-      ) : grouped.length === 0 ? (
-        <Card className="card-elevated p-10 text-center">
-          <p className="text-sm text-muted-foreground">Sin resultados para "{search}".</p>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {grouped.map((g) => (
-            <ProjectCard
-              key={g.project_id}
-              projectId={g.project_id}
-              rows={g.rows}
-              canEdit={canEdit}
-              onEdit={(p) => { setEditing(p); setOpenForm(true); }}
-              onDelete={(p) => setConfirmDelete(p)}
-            />
-          ))}
         </div>
-      )}
+        <div className="max-h-[600px] overflow-auto">
+          {isLoading ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">Cargando…</div>
+          ) : gridRows.length === 0 ? (
+            <div className="p-8 text-center text-sm text-muted-foreground">Sin proyectos para el filtro seleccionado.</div>
+          ) : (
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead>Periodo</TableHead>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Proyecto</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Responsable</TableHead>
+                  <TableHead>F. promesa</TableHead>
+                  {canEdit && <TableHead className="text-right">Acciones</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {gridRows.map((r) => {
+                  const tone = motivoTone(r.motivo);
+                  const Icon = tone.icon;
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {MONTH_NAMES_ES[r.mes - 1]} {r.anio}
+                      </TableCell>
+                      <TableCell>
+                        <span className="rounded-md bg-primary/10 px-2 py-0.5 font-mono text-xs font-bold text-primary">
+                          {r.project_id}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-sm max-w-[240px] truncate" title={r.project_name ?? ""}>
+                        {r.project_name ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">{r.customer ?? "—"}</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ${tone.bg} ${tone.text}`}>
+                          <Icon className="h-3.5 w-3.5" />
+                          {r.motivo ?? "—"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {r.project_status ? <Badge variant="outline" className="text-xs">{r.project_status}</Badge> : "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">{r.project_manager ?? "—"}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{r.promise_date ?? "—"}</TableCell>
+                      {canEdit && (
+                        <TableCell className="text-right whitespace-nowrap">
+                          <Button size="icon" variant="ghost" onClick={() => { setEditing(r); setOpenForm(true); }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => setConfirmDelete(r)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </Card>
+
 
       <ProyectoFormDialog
         open={openForm}
