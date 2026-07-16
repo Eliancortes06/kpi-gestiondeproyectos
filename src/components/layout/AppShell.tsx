@@ -51,12 +51,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <div className="flex h-full flex-col p-5">
             <Link to="/dashboard" className="flex items-center gap-3 pb-6" onClick={() => setOpenMobile(false)}>
-              <div className="grid h-10 w-10 place-items-center rounded-xl gradient-primary shadow-glow font-black text-lg">
-                K
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-base font-semibold tracking-tight">KPI Platform</span>
-                <span className="text-xs text-sidebar-foreground/60">Cumplimiento de proyectos</span>
+              <div className="flex h-12 w-full items-center justify-center rounded-xl bg-white px-3 py-2 shadow-elegant">
+                <img src={garsiteLogo.url} alt="Garsite" className="h-8 w-auto" />
               </div>
             </Link>
 
