@@ -1,0 +1,1 @@
+UPDATE public.motivos SET activo = true WHERE nombre = 'Design';
