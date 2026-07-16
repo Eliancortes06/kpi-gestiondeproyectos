@@ -88,6 +88,7 @@ function ProyectosPage() {
   const [search, setSearch] = useState("");
   const [filterAnio, setFilterAnio] = useState<string>("all");
   const [filterMes, setFilterMes] = useState<string>("all");
+  const [filterMotivo, setFilterMotivo] = useState<string>("all");
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Proyecto | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Proyecto | null>(null);
