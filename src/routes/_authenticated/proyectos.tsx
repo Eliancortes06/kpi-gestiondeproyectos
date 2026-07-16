@@ -197,7 +197,7 @@ function ProyectosPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:max-w-lg">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Año</Label>
             <Select value={filterAnio} onValueChange={setFilterAnio}>
@@ -217,6 +217,16 @@ function ProyectosPage() {
                 {MONTH_NAMES_ES.map((n, i) => (
                   <SelectItem key={i} value={String(i + 1)}>{n}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Motivo</Label>
+            <Select value={filterMotivo} onValueChange={setFilterMotivo}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {MOTIVOS.map((m) => (<SelectItem key={m} value={m}>{m}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
