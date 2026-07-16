@@ -85,19 +85,34 @@ function ProyectosPage() {
   const { data: proyectos = [], isLoading } = useProyectos();
 
   const [search, setSearch] = useState("");
+  const [filterAnio, setFilterAnio] = useState<string>("all");
+  const [filterMes, setFilterMes] = useState<string>("all");
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Proyecto | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Proyecto | null>(null);
 
+  const years = useMemo(
+    () => [...new Set(proyectos.map((p) => p.anio))].sort((a, b) => b - a),
+    [proyectos],
+  );
+
+  const filteredByPeriod = useMemo(() => {
+    return proyectos.filter((p) => {
+      if (filterAnio !== "all" && String(p.anio) !== filterAnio) return false;
+      if (filterMes !== "all" && String(p.mes) !== filterMes) return false;
+      return true;
+    });
+  }, [proyectos, filterAnio, filterMes]);
+
   const results = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return [] as Proyecto[];
-    return proyectos.filter((p) =>
+    return filteredByPeriod.filter((p) =>
       p.project_id.toLowerCase().includes(q) ||
       (p.project_name ?? "").toLowerCase().includes(q) ||
       (p.customer ?? "").toLowerCase().includes(q),
     );
-  }, [proyectos, search]);
+  }, [filteredByPeriod, search]);
 
   // Agrupar por project_id para ver evolución de motivos
   const grouped = useMemo(() => {
@@ -112,6 +127,13 @@ function ProyectosPage() {
       rows: rows.sort((a, b) => (b.anio - a.anio) || (b.mes - a.mes)),
     }));
   }, [results]);
+
+  const gridRows = useMemo(
+    () => [...filteredByPeriod].sort(
+      (a, b) => (b.anio - a.anio) || (b.mes - a.mes) || a.project_id.localeCompare(b.project_id),
+    ),
+    [filteredByPeriod],
+  );
 
   const saveMutation = useMutation({
     mutationFn: async (input: Partial<Proyecto> & { anio: number; mes: number; project_id: string }) => {
