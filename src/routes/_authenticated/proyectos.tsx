@@ -51,8 +51,15 @@ type Proyecto = {
 };
 
 const MOTIVOS = [
-  "OK", "Diseño", "Chassis", "Tanque", "Faltantes",
-  "Definiciones del cliente", "Cambio de requerimiento del cliente", "Mano de obra",
+  "On Time",
+  "Customer Definitions",
+  "Missing Components",
+  "Chassis",
+  "Labor",
+  "Tank",
+  "Logistics",
+  "BOM",
+  "Sub-assembly",
 ];
 
 function useProyectos() {
@@ -236,7 +243,7 @@ function ProyectosPage() {
 }
 
 function motivoTone(motivo: string | null) {
-  if (!motivo || motivo === "OK") return { bg: "bg-emerald-500/10", text: "text-emerald-700 dark:text-emerald-400", icon: CheckCircle2 };
+  if (!motivo || motivo === "On Time" || motivo === "OK") return { bg: "bg-emerald-500/10", text: "text-emerald-700 dark:text-emerald-400", icon: CheckCircle2 };
   return { bg: "bg-destructive/10", text: "text-destructive", icon: AlertTriangle };
 }
 
@@ -377,7 +384,7 @@ function ProyectoFormDialog({
       project_id: editing?.project_id ?? "",
       project_name: editing?.project_name ?? "",
       customer: editing?.customer ?? "",
-      motivo: editing?.motivo ?? "OK",
+      motivo: editing?.motivo ?? "On Time",
       production_end_date: editing?.production_end_date ?? "",
       promise_date: editing?.promise_date ?? "",
       project_status: editing?.project_status ?? "",
