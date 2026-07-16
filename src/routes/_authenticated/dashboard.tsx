@@ -72,15 +72,15 @@ function DashboardPage() {
   const chartsRef = useRef<HTMLDivElement>(null);
 
   // Indicadores derivados desde proyectos: % por motivo = count(motivo)/total del mes * 100
+  // Para meses sin proyectos cargados, se usa la data manual de indicadores_mensuales (tendencia histórica).
   const indicadoresFromProyectos = useMemo(() => {
     const motivoByName = new Map(motivos.map((m) => [m.nombre.toLowerCase(), m]));
-    // group per (anio, mes)
     const byPeriod = new Map<string, { anio: number; mes: number; total: number; counts: Map<string, number> }>();
     for (const p of proyectosMotivos) {
       if (!p.anio || !p.mes) continue;
       const norm = normalizeMotivo(p.motivo);
       const motivo = motivoByName.get(norm);
-      if (!motivo) continue; // exclude projects without a valid motivo from denominator
+      if (!motivo) continue;
       const key = `${p.anio}-${p.mes}`;
       let g = byPeriod.get(key);
       if (!g) { g = { anio: p.anio, mes: p.mes, total: 0, counts: new Map() }; byPeriod.set(key, g); }
@@ -88,7 +88,9 @@ function DashboardPage() {
       g.counts.set(motivo.id, (g.counts.get(motivo.id) ?? 0) + 1);
     }
     const out: typeof indicadores = [];
+    const periodsWithProjects = new Set<string>();
     for (const g of byPeriod.values()) {
+      periodsWithProjects.add(`${g.anio}-${g.mes}`);
       for (const m of motivos) {
         const c = g.counts.get(m.id) ?? 0;
         const pct = g.total > 0 ? (c / g.total) * 100 : 0;
@@ -102,6 +104,12 @@ function DashboardPage() {
           created_at: "",
           updated_at: "",
         });
+      }
+    }
+    // Fallback: incluir indicadores manuales de meses sin proyectos cargados (tendencia histórica)
+    for (const r of indicadores) {
+      if (!periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
+        out.push(r);
       }
     }
     return out;
