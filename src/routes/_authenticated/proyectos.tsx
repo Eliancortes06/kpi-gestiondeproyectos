@@ -88,6 +88,7 @@ function ProyectosPage() {
   const [search, setSearch] = useState("");
   const [filterAnio, setFilterAnio] = useState<string>("all");
   const [filterMes, setFilterMes] = useState<string>("all");
+  const [filterMotivo, setFilterMotivo] = useState<string>("all");
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Proyecto | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Proyecto | null>(null);
@@ -101,9 +102,10 @@ function ProyectosPage() {
     return proyectos.filter((p) => {
       if (filterAnio !== "all" && String(p.anio) !== filterAnio) return false;
       if (filterMes !== "all" && String(p.mes) !== filterMes) return false;
+      if (filterMotivo !== "all" && (p.motivo ?? "") !== filterMotivo) return false;
       return true;
     });
-  }, [proyectos, filterAnio, filterMes]);
+  }, [proyectos, filterAnio, filterMes, filterMotivo]);
 
   const results = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -195,7 +197,7 @@ function ProyectosPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:max-w-lg">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">Año</Label>
             <Select value={filterAnio} onValueChange={setFilterAnio}>
@@ -215,6 +217,16 @@ function ProyectosPage() {
                 {MONTH_NAMES_ES.map((n, i) => (
                   <SelectItem key={i} value={String(i + 1)}>{n}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Motivo</Label>
+            <Select value={filterMotivo} onValueChange={setFilterMotivo}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {MOTIVOS.map((m) => (<SelectItem key={m} value={m}>{m}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
@@ -252,7 +264,7 @@ function ProyectosPage() {
             <h2 className="text-base font-semibold tracking-tight">Todos los proyectos</h2>
             <p className="text-xs text-muted-foreground">
               {gridRows.length} registro{gridRows.length !== 1 ? "s" : ""}
-              {(filterAnio !== "all" || filterMes !== "all") && " (filtrado)"}
+              {(filterAnio !== "all" || filterMes !== "all" || filterMotivo !== "all") && " (filtrado)"}
             </p>
           </div>
         </div>
