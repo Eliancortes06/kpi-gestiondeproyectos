@@ -102,9 +102,10 @@ function ProyectosPage() {
     return proyectos.filter((p) => {
       if (filterAnio !== "all" && String(p.anio) !== filterAnio) return false;
       if (filterMes !== "all" && String(p.mes) !== filterMes) return false;
+      if (filterMotivo !== "all" && (p.motivo ?? "") !== filterMotivo) return false;
       return true;
     });
-  }, [proyectos, filterAnio, filterMes]);
+  }, [proyectos, filterAnio, filterMes, filterMotivo]);
 
   const results = useMemo(() => {
     const q = search.trim().toLowerCase();
