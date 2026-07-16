@@ -35,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-2">
           <img src={garsiteLogo.url} alt="Garsite" className="h-8 w-auto" />
-          <span className="font-semibold tracking-tight">KPI Platform</span>
+          <span className="font-semibold tracking-tight">Project Performance & Trends</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setOpenMobile((v) => !v)} aria-label="Menú">
           {openMobile ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
