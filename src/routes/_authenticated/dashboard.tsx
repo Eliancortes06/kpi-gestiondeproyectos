@@ -39,11 +39,28 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
+const MOTIVO_ALIASES: Record<string, string> = {
+  "ok": "on time",
+  "definiciones del cliente": "customer definitions",
+  "definicion del cliente": "customer definitions",
+  "cambio de requerimiento del cliente": "customer definitions",
+  "faltantes": "missing components",
+  "componentes faltantes": "missing components",
+  "chasis": "chassis",
+  "mano de obra": "labor",
+  "tanque": "tank",
+  "logistica": "logistics",
+  "logística": "logistics",
+  "assembly + sub-assembly": "sub-assembly",
+  "assembly": "sub-assembly",
+  "sub assembly": "sub-assembly",
+  "subassembly": "sub-assembly",
+};
+
 function normalizeMotivo(s: string | null | undefined): string {
   const v = (s ?? "").trim().toLowerCase();
   if (!v) return "";
-  if (v === "ok") return "on time";
-  return v;
+  return MOTIVO_ALIASES[v] ?? v;
 }
 
 function DashboardPage() {
