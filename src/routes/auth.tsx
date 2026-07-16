@@ -88,7 +88,7 @@ function AuthPage() {
               K
             </div>
             <div>
-              <p className="text-lg font-semibold tracking-tight">KPI Platform</p>
+              <p className="text-lg font-semibold tracking-tight">Project Performance & Trends</p>
               <p className="text-xs text-muted-foreground">Cumplimiento y causas de retraso</p>
             </div>
           </div>
