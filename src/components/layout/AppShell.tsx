@@ -10,6 +10,7 @@ import {
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import garsiteLogo from "@/assets/garsite-logo.png.asset.json";
 
 type NavItem = {
   to: string;
