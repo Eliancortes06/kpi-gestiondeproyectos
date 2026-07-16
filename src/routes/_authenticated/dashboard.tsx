@@ -78,13 +78,14 @@ function DashboardPage() {
     const byPeriod = new Map<string, { anio: number; mes: number; total: number; counts: Map<string, number> }>();
     for (const p of proyectosMotivos) {
       if (!p.anio || !p.mes) continue;
+      const norm = normalizeMotivo(p.motivo);
+      const motivo = motivoByName.get(norm);
+      if (!motivo) continue; // exclude projects without a valid motivo from denominator
       const key = `${p.anio}-${p.mes}`;
       let g = byPeriod.get(key);
       if (!g) { g = { anio: p.anio, mes: p.mes, total: 0, counts: new Map() }; byPeriod.set(key, g); }
       g.total += 1;
-      const norm = normalizeMotivo(p.motivo);
-      const motivo = motivoByName.get(norm);
-      if (motivo) g.counts.set(motivo.id, (g.counts.get(motivo.id) ?? 0) + 1);
+      g.counts.set(motivo.id, (g.counts.get(motivo.id) ?? 0) + 1);
     }
     const out: typeof indicadores = [];
     for (const g of byPeriod.values()) {
