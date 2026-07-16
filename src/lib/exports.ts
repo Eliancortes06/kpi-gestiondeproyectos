@@ -59,19 +59,28 @@ export async function exportElementToPNG(el: HTMLElement, filename: string) {
 }
 
 export async function exportElementToPDF(el: HTMLElement, filename: string) {
-  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-    import("html2canvas"),
+  const [{ toPng }, { jsPDF }] = await Promise.all([
+    import("html-to-image"),
     import("jspdf"),
   ]);
-  const canvas = await html2canvas(el, { backgroundColor: "#ffffff", scale: 2 });
-  const img = canvas.toDataURL("image/png");
+  const dataUrl = await toPng(el, {
+    backgroundColor: "#ffffff",
+    pixelRatio: 2,
+    cacheBust: true,
+  });
+  const img = new Image();
+  img.src = dataUrl;
+  await new Promise((res, rej) => {
+    img.onload = res;
+    img.onerror = rej;
+  });
   const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
-  const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
-  const w = canvas.width * ratio;
-  const h = canvas.height * ratio;
-  pdf.addImage(img, "PNG", (pageW - w) / 2, (pageH - h) / 2, w, h);
+  const ratio = Math.min(pageW / img.width, pageH / img.height);
+  const w = img.width * ratio;
+  const h = img.height * ratio;
+  pdf.addImage(dataUrl, "PNG", (pageW - w) / 2, (pageH - h) / 2, w, h);
   pdf.save(filename);
 }
 
