@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground font-black">K</div>
+          <img src={garsiteLogo.url} alt="Garsite" className="h-8 w-auto" />
           <span className="font-semibold tracking-tight">KPI Platform</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setOpenMobile((v) => !v)} aria-label="Menú">
