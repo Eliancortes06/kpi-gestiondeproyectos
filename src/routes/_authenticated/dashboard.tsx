@@ -20,6 +20,17 @@ import { DEFAULT_FILTERS, FiltersBar, type Filters } from "@/components/dashboar
 import { exportElementToPDF } from "@/lib/exports";
 import { toast } from "sonner";
 
+const proyectosMotivoQuery = () => ({
+  queryKey: ["proyectos-motivo-mensual"],
+  queryFn: async () => {
+    const { data, error } = await (supabase as any)
+      .from("proyectos_seguimiento")
+      .select("anio,mes,motivo");
+    if (error) throw error;
+    return (data ?? []) as { anio: number; mes: number; motivo: string | null }[];
+  },
+});
+
 export const Route = createFileRoute("/_authenticated/dashboard")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(motivosQuery());
@@ -28,27 +39,70 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
+function normalizeMotivo(s: string | null | undefined): string {
+  const v = (s ?? "").trim().toLowerCase();
+  if (!v) return "";
+  if (v === "ok") return "on time";
+  return v;
+}
+
 function DashboardPage() {
   const { data: motivos } = useSuspenseQuery(motivosQuery());
   const { data: indicadores } = useSuspenseQuery(indicadoresQuery());
+  const { data: proyectosMotivos = [] } = useQuery(proyectosMotivoQuery());
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [selectedMotivo, setSelectedMotivo] = useState<Motivo | null>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
 
-  const allPeriods = useMemo(() => uniquePeriods(indicadores), [indicadores]);
+  // Indicadores derivados desde proyectos: % por motivo = count(motivo)/total del mes * 100
+  const indicadoresFromProyectos = useMemo(() => {
+    const motivoByName = new Map(motivos.map((m) => [m.nombre.toLowerCase(), m]));
+    // group per (anio, mes)
+    const byPeriod = new Map<string, { anio: number; mes: number; total: number; counts: Map<string, number> }>();
+    for (const p of proyectosMotivos) {
+      if (!p.anio || !p.mes) continue;
+      const key = `${p.anio}-${p.mes}`;
+      let g = byPeriod.get(key);
+      if (!g) { g = { anio: p.anio, mes: p.mes, total: 0, counts: new Map() }; byPeriod.set(key, g); }
+      g.total += 1;
+      const norm = normalizeMotivo(p.motivo);
+      const motivo = motivoByName.get(norm);
+      if (motivo) g.counts.set(motivo.id, (g.counts.get(motivo.id) ?? 0) + 1);
+    }
+    const out: typeof indicadores = [];
+    for (const g of byPeriod.values()) {
+      for (const m of motivos) {
+        const c = g.counts.get(m.id) ?? 0;
+        const pct = g.total > 0 ? (c / g.total) * 100 : 0;
+        out.push({
+          id: `${g.anio}-${g.mes}-${m.id}`,
+          anio: g.anio,
+          mes: g.mes,
+          motivo_id: m.id,
+          porcentaje: Number(pct.toFixed(2)),
+          observaciones: null,
+          created_at: "",
+          updated_at: "",
+        });
+      }
+    }
+    return out;
+  }, [proyectosMotivos, motivos, indicadores]);
+
+  const allPeriods = useMemo(() => uniquePeriods(indicadoresFromProyectos), [indicadoresFromProyectos]);
   const years = useMemo(
     () => [...new Set(allPeriods.map((p) => p.anio))].sort((a, b) => a - b),
     [allPeriods],
   );
 
   const filteredRows = useMemo(() => {
-    return indicadores.filter((r) => {
+    return indicadoresFromProyectos.filter((r) => {
       if (filters.anio !== "all" && String(r.anio) !== filters.anio) return false;
       if (filters.mes !== "all" && String(r.mes) !== filters.mes) return false;
       if (filters.motivoId !== "all" && r.motivo_id !== filters.motivoId) return false;
       return true;
     });
-  }, [indicadores, filters]);
+  }, [indicadoresFromProyectos, filters]);
 
   const periods = useMemo(() => uniquePeriods(filteredRows), [filteredRows]);
   const enriched = useMemo(() => enrich(filteredRows, motivos), [filteredRows, motivos]);
