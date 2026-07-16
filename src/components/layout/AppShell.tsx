@@ -10,6 +10,7 @@ import {
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import garsiteLogo from "@/assets/garsite-logo.png.asset.json";
 
 type NavItem = {
   to: string;
@@ -33,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground font-black">K</div>
+          <img src={garsiteLogo.url} alt="Garsite" className="h-8 w-auto" />
           <span className="font-semibold tracking-tight">KPI Platform</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setOpenMobile((v) => !v)} aria-label="Menú">
@@ -50,12 +51,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <div className="flex h-full flex-col p-5">
             <Link to="/dashboard" className="flex items-center gap-3 pb-6" onClick={() => setOpenMobile(false)}>
-              <div className="grid h-10 w-10 place-items-center rounded-xl gradient-primary shadow-glow font-black text-lg">
-                K
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-base font-semibold tracking-tight">KPI Platform</span>
-                <span className="text-xs text-sidebar-foreground/60">Cumplimiento de proyectos</span>
+              <div className="flex h-12 w-full items-center justify-center rounded-xl bg-white px-3 py-2 shadow-elegant">
+                <img src={garsiteLogo.url} alt="Garsite" className="h-8 w-auto" />
               </div>
             </Link>
 
