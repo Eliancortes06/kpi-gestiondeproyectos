@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      indicadores_cumplimiento: {
+        Row: {
+          anio: number
+          created_at: string
+          created_by: string | null
+          denominador: number
+          id: string
+          mes: number
+          numerador: number
+          observaciones: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          anio: number
+          created_at?: string
+          created_by?: string | null
+          denominador?: number
+          id?: string
+          mes: number
+          numerador?: number
+          observaciones?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          anio?: number
+          created_at?: string
+          created_by?: string | null
+          denominador?: number
+          id?: string
+          mes?: number
+          numerador?: number
+          observaciones?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       indicadores_mensuales: {
         Row: {
           anio: number
