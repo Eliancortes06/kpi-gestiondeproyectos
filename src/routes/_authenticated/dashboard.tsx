@@ -174,6 +174,13 @@ function DashboardPage() {
         </div>
       </header>
 
+      <CumplimientoSection />
+
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Motivos de retraso</h2>
+        <p className="text-sm text-muted-foreground">Distribución de proyectos por causa de retraso.</p>
+      </div>
+
       <FiltersBar filters={filters} onChange={setFilters} motivos={motivos} years={years} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
