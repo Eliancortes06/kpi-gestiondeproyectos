@@ -18,6 +18,7 @@ import { MONTH_SHORT_ES, MONTH_NAMES_ES, periodLabel } from "@/lib/periods";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { DEFAULT_FILTERS, FiltersBar, type Filters } from "@/components/dashboard/FiltersBar";
 import { exportElementToPDF } from "@/lib/exports";
+import { CumplimientoSection } from "@/components/dashboard/CumplimientoSection";
 import { toast } from "sonner";
 
 const proyectosMotivoQuery = () => ({
@@ -172,6 +173,13 @@ function DashboardPage() {
           <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="mr-2 h-4 w-4" />PDF</Button>
         </div>
       </header>
+
+      <CumplimientoSection />
+
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Motivos de retraso</h2>
+        <p className="text-sm text-muted-foreground">Distribución de proyectos por causa de retraso.</p>
+      </div>
 
       <FiltersBar filters={filters} onChange={setFilters} motivos={motivos} years={years} />
 
