@@ -18,6 +18,7 @@ import { MONTH_SHORT_ES, MONTH_NAMES_ES, periodLabel } from "@/lib/periods";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { DEFAULT_FILTERS, FiltersBar, type Filters } from "@/components/dashboard/FiltersBar";
 import { exportElementToPDF } from "@/lib/exports";
+import { CumplimientoSection } from "@/components/dashboard/CumplimientoSection";
 import { toast } from "sonner";
 
 const proyectosMotivoQuery = () => ({
