@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  CartesianGrid, LabelList, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,7 +32,7 @@ export function CumplimientoSection() {
       <div>
         <h2 className="text-lg font-semibold tracking-tight">Indicadores de cumplimiento</h2>
         <p className="text-sm text-muted-foreground">
-          Cálculo mensual a partir de numerador y denominador registrados en Gestión de Indicadores.
+          Comportamiento y cumplimiento de los indicadores del Sistema Integral de Gestión
         </p>
       </div>
 
@@ -56,6 +56,7 @@ export function CumplimientoSection() {
               sparkline={series}
               lowerIsBetter={d.lowerIsBetter}
               yAxisMax={yAxisMax}
+              showPointLabels
               onClick={() => setSelected(d)}
             />
           );
@@ -109,7 +110,7 @@ function CumplimientoDialog({
 
             <div className="h-[300px] rounded-md border p-3">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 4 }}>
+                <LineChart data={chartData} margin={{ top: 22, right: 16, bottom: 0, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.35} vertical={false} />
                   <XAxis
                     dataKey="mes"
@@ -130,7 +131,14 @@ function CumplimientoDialog({
                     formatter={(v: number, n: string) => [`${Number(v).toFixed(1)}%`, n]}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="logro" name="Logro" stroke={def.color} strokeWidth={2.5} dot connectNulls />
+                  <Line type="monotone" dataKey="logro" name="Logro" stroke={def.color} strokeWidth={2.5} dot connectNulls>
+                    <LabelList
+                      dataKey="logro"
+                      position="top"
+                      formatter={(value: number | null) => value == null ? "" : `${Number(value).toFixed(0)}%`}
+                      className="fill-foreground text-[11px] font-semibold"
+                    />
+                  </Line>
                   <Line type="monotone" dataKey="meta" name="Meta" stroke="#3AA0FF" strokeWidth={1.5} dot={false} />
                   <Line type="monotone" dataKey="limite" name="Límite permisible" stroke="#B36AC1" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
                 </LineChart>
