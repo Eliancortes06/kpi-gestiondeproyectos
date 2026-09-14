@@ -144,7 +144,7 @@ export function KpiCard({
       {sparkline && sparkline.length > 1 && view === "trend" && (
         <div className="mt-3 h-32 -mx-1">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkline} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+            <AreaChart data={sparkline} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id={`trend-${safeId}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={color} stopOpacity={0.4} />
@@ -157,7 +157,7 @@ export function KpiCard({
                 tick={{ fontSize: 10 }}
                 tickCount={5}
                 unit="%"
-                width={42}
+                width={46}
                 domain={[0, yAxisMax]}
                 allowDecimals={false}
               />

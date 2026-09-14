@@ -109,7 +109,7 @@ function CumplimientoDialog({
 
             <div className="h-[300px] rounded-md border p-3">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: -18 }}>
+                <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.35} vertical={false} />
                   <XAxis
                     dataKey="mes"
