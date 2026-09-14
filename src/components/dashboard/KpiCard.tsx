@@ -12,6 +12,8 @@ export type KpiCardProps = {
   sparkline?: Array<{ label: string; value: number | null }>;
   /** true for indicators where a decrease is good (delay causes). "On Time" indicator should be false. */
   lowerIsBetter?: boolean;
+  /** Maximum value shown on the trend chart's percentage axis. */
+  yAxisMax?: number;
   onClick?: () => void;
 };
 
@@ -22,6 +24,7 @@ export function KpiCard({
   color = "#1F3F5E",
   sparkline,
   lowerIsBetter = true,
+  yAxisMax = 100,
   onClick,
 }: KpiCardProps) {
   const [view, setView] = useState<"summary" | "trend">("summary");
@@ -141,7 +144,7 @@ export function KpiCard({
       {sparkline && sparkline.length > 1 && view === "trend" && (
         <div className="mt-3 h-32 -mx-1">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkline} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+            <AreaChart data={sparkline} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id={`trend-${safeId}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={color} stopOpacity={0.4} />
@@ -150,7 +153,14 @@ export function KpiCard({
               </defs>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.3} vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-              <YAxis tick={{ fontSize: 10 }} unit="%" width={38} domain={[0, 100]} />
+              <YAxis
+                tick={{ fontSize: 10 }}
+                tickCount={5}
+                unit="%"
+                width={46}
+                domain={[0, yAxisMax]}
+                allowDecimals={false}
+              />
               <Tooltip
                 contentStyle={{
                   borderRadius: 8,

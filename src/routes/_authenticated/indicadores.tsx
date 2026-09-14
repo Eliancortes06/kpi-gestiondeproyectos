@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { exportRowsToCSV, exportRowsToXLSX } from "@/lib/exports";
 import { cn } from "@/lib/utils";
+import { CumplimientoManager } from "@/components/dashboard/CumplimientoManager";
 
 export const Route = createFileRoute("/_authenticated/indicadores")({
   loader: ({ context }) => {
@@ -169,6 +170,8 @@ function IndicadoresPage() {
           )}
         </div>
       </header>
+
+      <CumplimientoManager canEdit={canEdit} />
 
       <Card className="card-elevated p-4">
         <div className="flex flex-wrap items-end gap-3">

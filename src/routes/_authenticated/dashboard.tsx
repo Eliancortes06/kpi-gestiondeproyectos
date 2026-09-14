@@ -167,7 +167,7 @@ function DashboardPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Diagnostico de retrasos</h1>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Indicadores de gestión de proyectos</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="mr-2 h-4 w-4" />PDF</Button>
@@ -261,7 +261,7 @@ function DashboardPage() {
                 margin={{ top: 8, right: 24, bottom: 8, left: 16 }}
               >
                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.4} horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 12 }} unit="%" />
+                <XAxis type="number" tick={{ fontSize: 12 }} unit="%" domain={[0, 100]} allowDecimals={false} />
                 <YAxis type="category" dataKey="nombre" tick={{ fontSize: 12 }} width={140} />
                 <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toFixed(1)}%`, "Promedio"]} />
                 <Bar dataKey="avg" radius={[0, 6, 6, 0]}>

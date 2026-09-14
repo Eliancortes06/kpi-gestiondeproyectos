@@ -43,8 +43,9 @@ export function CumplimientoSection() {
             value: logroOf(r),
           }));
           const withValue = series.filter((s) => s.value != null);
-          const value = withValue.length ? withValue[withValue.length - 1].value! : null;
-          const previous = withValue.length > 1 ? withValue[withValue.length - 2].value! : null;
+          const value = withValue.at(-1)?.value ?? null;
+          const previous = withValue.at(-2)?.value ?? null;
+          const yAxisMax = axisMaximum(d, withValue.map((s) => s.value ?? 0));
           return (
             <KpiCard
               key={d.tipo}
@@ -54,6 +55,7 @@ export function CumplimientoSection() {
               color={d.color}
               sparkline={series}
               lowerIsBetter={d.lowerIsBetter}
+              yAxisMax={yAxisMax}
               onClick={() => setSelected(d)}
             />
           );
@@ -81,6 +83,7 @@ function CumplimientoDialog({
         limite: def.limitePermisible,
       }))
     : [];
+  const yAxisMax = def ? axisMaximum(def, chartData.map((r) => r.logro ?? 0)) : 100;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
@@ -106,10 +109,22 @@ function CumplimientoDialog({
 
             <div className="h-[300px] rounded-md border p-3">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: -18 }}>
+                <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 4 }}>
                   <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.35} vertical={false} />
-                  <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} unit="%" width={46} />
+                  <XAxis
+                    dataKey="mes"
+                    tick={{ fontSize: 11 }}
+                    interval="preserveStartEnd"
+                    minTickGap={18}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    tickCount={6}
+                    unit="%"
+                    width={48}
+                    domain={[0, yAxisMax]}
+                    allowDecimals={false}
+                  />
                   <Tooltip
                     contentStyle={{ borderRadius: 8, border: "1px solid var(--color-border)", fontSize: 12 }}
                     formatter={(v: number, n: string) => [`${Number(v).toFixed(1)}%`, n]}
@@ -170,6 +185,12 @@ function CumplimientoDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+function axisMaximum(def: CumplimientoDef, values: number[]) {
+  if (!def.lowerIsBetter) return 100;
+  const highest = Math.max(def.meta, def.limitePermisible, ...values);
+  return Math.max(10, Math.ceil((highest * 1.2) / 5) * 5);
 }
 
 function Info({ label, value, className }: { label: string; value: string; className?: string }) {
