@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight, ArrowDownRight, Minus, LineChart as LineIcon, Gauge } from "lucide-react";
 import { useState } from "react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export type KpiCardProps = {
   label: string;
@@ -14,6 +14,8 @@ export type KpiCardProps = {
   lowerIsBetter?: boolean;
   /** Maximum value shown on the trend chart's percentage axis. */
   yAxisMax?: number;
+  /** Show each percentage next to its point in the expanded trend view. */
+  showPointLabels?: boolean;
   onClick?: () => void;
 };
 
@@ -25,6 +27,7 @@ export function KpiCard({
   sparkline,
   lowerIsBetter = true,
   yAxisMax = 100,
+  showPointLabels = false,
   onClick,
 }: KpiCardProps) {
   const [view, setView] = useState<"summary" | "trend">("summary");
@@ -144,7 +147,7 @@ export function KpiCard({
       {sparkline && sparkline.length > 1 && view === "trend" && (
         <div className="mt-3 h-32 -mx-1">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkline} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+            <AreaChart data={sparkline} margin={{ top: showPointLabels ? 18 : 4, right: 8, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id={`trend-${safeId}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={color} stopOpacity={0.4} />
@@ -178,7 +181,16 @@ export function KpiCard({
                 fill={`url(#trend-${safeId})`}
                 isAnimationActive
                 connectNulls
-              />
+              >
+                {showPointLabels && (
+                  <LabelList
+                    dataKey="value"
+                    position="top"
+                    formatter={(value: number | null) => value == null ? "" : `${Number(value).toFixed(0)}%`}
+                    className="fill-foreground text-[10px] font-semibold"
+                  />
+                )}
+              </Area>
             </AreaChart>
           </ResponsiveContainer>
         </div>
