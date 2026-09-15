@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -174,8 +175,17 @@ function DashboardPage() {
         </div>
       </header>
 
-      <CumplimientoSection />
+      <Tabs defaultValue="motivos" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="motivos">Motivos de retraso</TabsTrigger>
+          <TabsTrigger value="cumplimiento">Indicadores de cumplimiento</TabsTrigger>
+        </TabsList>
 
+        <TabsContent value="cumplimiento" className="space-y-6">
+          <CumplimientoSection />
+        </TabsContent>
+
+        <TabsContent value="motivos" className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold tracking-tight">Motivos de retraso</h2>
         <p className="text-sm text-muted-foreground">Distribución de proyectos por causa de retraso.</p>
