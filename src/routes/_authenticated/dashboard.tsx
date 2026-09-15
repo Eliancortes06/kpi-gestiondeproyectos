@@ -286,6 +286,9 @@ function DashboardPage() {
 
       </div>
 
+        </TabsContent>
+      </Tabs>
+
       <MotivoProjectsDialog
         motivo={selectedMotivo}
         onClose={() => setSelectedMotivo(null)}
