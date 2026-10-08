@@ -23,13 +23,23 @@ import { CumplimientoSection } from "@/components/dashboard/CumplimientoSection"
 import { toast } from "sonner";
 
 const proyectosMotivoQuery = () => ({
-  queryKey: ["proyectos-motivo-mensual"],
+  queryKey: ["proyectos", "motivo-mensual"],
+  staleTime: 0,
+  refetchOnMount: "always" as const,
+  refetchOnWindowFocus: true,
   queryFn: async () => {
-    const { data, error } = await (supabase as any)
-      .from("proyectos_seguimiento")
-      .select("anio,mes,motivo");
-    if (error) throw error;
-    return (data ?? []) as { anio: number; mes: number; motivo: string | null }[];
+    const all: { anio: number; mes: number; motivo: string | null }[] = [];
+    const size = 1000;
+    for (let from = 0; ; from += size) {
+      const { data, error } = await (supabase as any)
+        .from("proyectos_seguimiento")
+        .select("anio,mes,motivo")
+        .range(from, from + size - 1);
+      if (error) throw error;
+      all.push(...(data ?? []));
+      if (!data || data.length < size) break;
+    }
+    return all;
   },
 });
 
