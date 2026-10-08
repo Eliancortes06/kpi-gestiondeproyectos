@@ -51,7 +51,9 @@ function IndicadoresPage() {
   const { data: motivos } = useSuspenseQuery(motivosQuery());
   const { data: indicadores } = useSuspenseQuery(indicadoresQuery());
   const { data: role } = useSuspenseQuery(currentRoleQuery());
-  const canEdit = role === "admin";
+  // Acceso público (sin login): cualquier persona con el enlace puede registrar datos.
+  void role;
+  const canEdit = true;
 
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Indicador | null>(null);

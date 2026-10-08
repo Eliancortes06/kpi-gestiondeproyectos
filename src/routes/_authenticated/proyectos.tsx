@@ -82,7 +82,7 @@ function useProyectos() {
 function ProyectosPage() {
   const qc = useQueryClient();
   const { data: role } = useSuspenseQuery(currentRoleQuery());
-  const canEdit = role === "admin";
+  void role; const canEdit = true; // acceso público sin login
   const { data: proyectos = [], isLoading } = useProyectos();
 
   const [search, setSearch] = useState("");
