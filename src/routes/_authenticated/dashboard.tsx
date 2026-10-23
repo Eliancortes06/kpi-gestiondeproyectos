@@ -28,12 +28,12 @@ const proyectosMotivoQuery = () => ({
   refetchOnMount: "always" as const,
   refetchOnWindowFocus: true,
   queryFn: async () => {
-    const all: { anio: number; mes: number; motivo: string | null }[] = [];
+    const all: { anio: number; mes: number; motivo: string | null; project_manager: string | null }[] = [];
     const size = 1000;
     for (let from = 0; ; from += size) {
       const { data, error } = await (supabase as any)
         .from("proyectos_seguimiento")
-        .select("anio,mes,motivo")
+        .select("anio,mes,motivo,project_manager")
         .range(from, from + size - 1);
       if (error) throw error;
       all.push(...(data ?? []));
