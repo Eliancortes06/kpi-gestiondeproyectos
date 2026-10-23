@@ -127,14 +127,15 @@ function DashboardPage() {
         });
       }
     }
-    // Fallback: incluir indicadores manuales de meses sin proyectos cargados (tendencia histórica)
+    // Fallback: incluir indicadores manuales de meses sin proyectos cargados (tendencia histórica).
+    // Con filtro de responsable activo se omiten: la data manual no tiene responsable asignado.
     for (const r of indicadores) {
-      if (!periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
+      if (filters.responsable === "all" && !periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
         out.push(r);
       }
     }
     return out;
-  }, [proyectosMotivos, motivos, indicadores]);
+  }, [proyectosMotivos, motivos, indicadores, filters.responsable]);
 
   const allPeriods = useMemo(() => uniquePeriods(indicadoresFromProyectos), [indicadoresFromProyectos]);
   const years = useMemo(
@@ -210,7 +211,7 @@ function DashboardPage() {
         <p className="text-sm text-muted-foreground">Distribución de proyectos por causa de retraso.</p>
       </div>
 
-      <FiltersBar filters={filters} onChange={setFilters} motivos={motivos} years={years} />
+      <FiltersBar filters={filters} onChange={setFilters} motivos={motivos} years={years} responsables={responsables} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {motivos.filter((m) => m.activo).map((m) => {
