@@ -384,8 +384,16 @@ function MotivoProjectsDialog({
             {isOnTime ? "Proyectos entregados a tiempo" : `Proyectos afectados: ${motivo?.nombre ?? ""}`}
           </DialogTitle>
           <DialogDescription>
-            {filters.anio !== "all" || filters.mes !== "all"
-              ? `Filtro: ${filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] + " " : ""}${filters.anio !== "all" ? filters.anio : "todos los años"}`
+            {[
+              filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] : null,
+              filters.anio !== "all" ? filters.anio : null,
+              filters.responsable !== "all" ? `Resp.: ${filters.responsable}` : null,
+            ].filter(Boolean).length > 0
+              ? `Filtro: ${[
+                  filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] : null,
+                  filters.anio !== "all" ? filters.anio : null,
+                  filters.responsable !== "all" ? `Resp.: ${filters.responsable}` : null,
+                ].filter(Boolean).join(" · ")}`
               : "Todos los periodos"}
           </DialogDescription>
         </DialogHeader>
