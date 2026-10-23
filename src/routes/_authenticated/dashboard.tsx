@@ -344,7 +344,7 @@ function MotivoProjectsDialog({
   const isOnTime = motivo?.nombre.toLowerCase() === "on time";
 
   const { data, isLoading } = useQuery({
-    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio, filters.mes],
+    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio, filters.mes, filters.responsable],
     enabled: open,
     queryFn: async (): Promise<ProyectoRow[]> => {
       let q = (supabase as any)
@@ -364,6 +364,7 @@ function MotivoProjectsDialog({
       }
       if (filters.anio !== "all") q = q.eq("anio", Number(filters.anio));
       if (filters.mes !== "all") q = q.eq("mes", Number(filters.mes));
+      if (filters.responsable !== "all") q = q.ilike("project_manager", filters.responsable);
 
       const { data, error } = await q;
       if (error) throw error;
