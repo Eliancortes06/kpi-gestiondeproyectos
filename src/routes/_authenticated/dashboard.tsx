@@ -83,12 +83,21 @@ function DashboardPage() {
   const [selectedMotivo, setSelectedMotivo] = useState<Motivo | null>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
 
+  // Lista de responsables disponibles en los proyectos cargados
+  const responsables = useMemo(
+    () =>
+      [...new Set(proyectosMotivos.map((p) => (p.project_manager ?? "").trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b)),
+    [proyectosMotivos],
+  );
+
   // Indicadores derivados desde proyectos: % por motivo = count(motivo)/total del mes * 100
   // Para meses sin proyectos cargados, se usa la data manual de indicadores_mensuales (tendencia histórica).
   const indicadoresFromProyectos = useMemo(() => {
     const motivoByName = new Map(motivos.map((m) => [m.nombre.toLowerCase(), m]));
     const byPeriod = new Map<string, { anio: number; mes: number; total: number; counts: Map<string, number> }>();
     for (const p of proyectosMotivos) {
+      if (filters.responsable !== "all" && (p.project_manager ?? "").trim() !== filters.responsable) continue;
       if (!p.anio || !p.mes) continue;
       const norm = normalizeMotivo(p.motivo);
       const motivo = motivoByName.get(norm);
