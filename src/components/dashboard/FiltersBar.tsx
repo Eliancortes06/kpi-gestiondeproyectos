@@ -8,12 +8,14 @@ export type Filters = {
   anio: string; // "all" or year string
   mes: string; // "all" or 1..12
   motivoId: string; // "all" or id
+  responsable: string; // "all" or project_manager name
 };
 
 export const DEFAULT_FILTERS: Filters = {
   anio: "all",
   mes: "all",
   motivoId: "all",
+  responsable: "all",
 };
 
 export function FiltersBar({
@@ -21,15 +23,17 @@ export function FiltersBar({
   onChange,
   motivos,
   years,
+  responsables,
 }: {
   filters: Filters;
   onChange: (f: Filters) => void;
   motivos: Motivo[];
   years: number[];
+  responsables?: string[];
 }) {
   return (
     <Card className="card-elevated p-4 sm:p-5">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="min-w-[120px] space-y-1">
           <Label className="text-xs text-muted-foreground">Año</Label>
           <Select value={filters.anio} onValueChange={(v) => onChange({ ...filters, anio: v })}>
@@ -62,6 +66,18 @@ export function FiltersBar({
             </SelectContent>
           </Select>
         </div>
+        {responsables && responsables.length > 0 && (
+          <div className="min-w-[180px] space-y-1">
+            <Label className="text-xs text-muted-foreground">Responsable</Label>
+            <Select value={filters.responsable} onValueChange={(v) => onChange({ ...filters, responsable: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {responsables.map((r) => (<SelectItem key={r} value={r}>{r}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
     </Card>
   );
