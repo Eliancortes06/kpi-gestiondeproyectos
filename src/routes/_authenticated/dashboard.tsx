@@ -28,12 +28,12 @@ const proyectosMotivoQuery = () => ({
   refetchOnMount: "always" as const,
   refetchOnWindowFocus: true,
   queryFn: async () => {
-    const all: { anio: number; mes: number; motivo: string | null }[] = [];
+    const all: { anio: number; mes: number; motivo: string | null; project_manager: string | null }[] = [];
     const size = 1000;
     for (let from = 0; ; from += size) {
       const { data, error } = await (supabase as any)
         .from("proyectos_seguimiento")
-        .select("anio,mes,motivo")
+        .select("anio,mes,motivo,project_manager")
         .range(from, from + size - 1);
       if (error) throw error;
       all.push(...(data ?? []));
@@ -83,12 +83,21 @@ function DashboardPage() {
   const [selectedMotivo, setSelectedMotivo] = useState<Motivo | null>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
 
+  // Lista de responsables disponibles en los proyectos cargados
+  const responsables = useMemo(
+    () =>
+      [...new Set(proyectosMotivos.map((p) => (p.project_manager ?? "").trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b)),
+    [proyectosMotivos],
+  );
+
   // Indicadores derivados desde proyectos: % por motivo = count(motivo)/total del mes * 100
   // Para meses sin proyectos cargados, se usa la data manual de indicadores_mensuales (tendencia histórica).
   const indicadoresFromProyectos = useMemo(() => {
     const motivoByName = new Map(motivos.map((m) => [m.nombre.toLowerCase(), m]));
     const byPeriod = new Map<string, { anio: number; mes: number; total: number; counts: Map<string, number> }>();
     for (const p of proyectosMotivos) {
+      if (filters.responsable !== "all" && (p.project_manager ?? "").trim() !== filters.responsable) continue;
       if (!p.anio || !p.mes) continue;
       const norm = normalizeMotivo(p.motivo);
       const motivo = motivoByName.get(norm);
@@ -118,14 +127,15 @@ function DashboardPage() {
         });
       }
     }
-    // Fallback: incluir indicadores manuales de meses sin proyectos cargados (tendencia histórica)
+    // Fallback: incluir indicadores manuales de meses sin proyectos cargados (tendencia histórica).
+    // Con filtro de responsable activo se omiten: la data manual no tiene responsable asignado.
     for (const r of indicadores) {
-      if (!periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
+      if (filters.responsable === "all" && !periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
         out.push(r);
       }
     }
     return out;
-  }, [proyectosMotivos, motivos, indicadores]);
+  }, [proyectosMotivos, motivos, indicadores, filters.responsable]);
 
   const allPeriods = useMemo(() => uniquePeriods(indicadoresFromProyectos), [indicadoresFromProyectos]);
   const years = useMemo(
@@ -201,7 +211,7 @@ function DashboardPage() {
         <p className="text-sm text-muted-foreground">Distribución de proyectos por causa de retraso.</p>
       </div>
 
-      <FiltersBar filters={filters} onChange={setFilters} motivos={motivos} years={years} />
+      <FiltersBar filters={filters} onChange={setFilters} motivos={motivos} years={years} responsables={responsables} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {motivos.filter((m) => m.activo).map((m) => {
@@ -334,7 +344,7 @@ function MotivoProjectsDialog({
   const isOnTime = motivo?.nombre.toLowerCase() === "on time";
 
   const { data, isLoading } = useQuery({
-    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio, filters.mes],
+    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio, filters.mes, filters.responsable],
     enabled: open,
     queryFn: async (): Promise<ProyectoRow[]> => {
       let q = (supabase as any)
@@ -354,6 +364,7 @@ function MotivoProjectsDialog({
       }
       if (filters.anio !== "all") q = q.eq("anio", Number(filters.anio));
       if (filters.mes !== "all") q = q.eq("mes", Number(filters.mes));
+      if (filters.responsable !== "all") q = q.ilike("project_manager", filters.responsable);
 
       const { data, error } = await q;
       if (error) throw error;
@@ -373,8 +384,16 @@ function MotivoProjectsDialog({
             {isOnTime ? "Proyectos entregados a tiempo" : `Proyectos afectados: ${motivo?.nombre ?? ""}`}
           </DialogTitle>
           <DialogDescription>
-            {filters.anio !== "all" || filters.mes !== "all"
-              ? `Filtro: ${filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] + " " : ""}${filters.anio !== "all" ? filters.anio : "todos los años"}`
+            {[
+              filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] : null,
+              filters.anio !== "all" ? filters.anio : null,
+              filters.responsable !== "all" ? `Resp.: ${filters.responsable}` : null,
+            ].filter(Boolean).length > 0
+              ? `Filtro: ${[
+                  filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] : null,
+                  filters.anio !== "all" ? filters.anio : null,
+                  filters.responsable !== "all" ? `Resp.: ${filters.responsable}` : null,
+                ].filter(Boolean).join(" · ")}`
               : "Todos los periodos"}
           </DialogDescription>
         </DialogHeader>
