@@ -97,7 +97,7 @@ function DashboardPage() {
     const motivoByName = new Map(motivos.map((m) => [m.nombre.toLowerCase(), m]));
     const byPeriod = new Map<string, { anio: number; mes: number; total: number; counts: Map<string, number> }>();
     for (const p of proyectosMotivos) {
-      if (filters.responsable !== "all" && (p.project_manager ?? "").trim() !== filters.responsable) continue;
+      if (filters.responsable.length && !filters.responsable.includes((p.project_manager ?? "").trim())) continue;
       if (!p.anio || !p.mes) continue;
       const norm = normalizeMotivo(p.motivo);
       const motivo = motivoByName.get(norm);
@@ -130,7 +130,7 @@ function DashboardPage() {
     // Fallback: incluir indicadores manuales de meses sin proyectos cargados (tendencia histórica).
     // Con filtro de responsable activo se omiten: la data manual no tiene responsable asignado.
     for (const r of indicadores) {
-      if (filters.responsable === "all" && !periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
+      if (filters.responsable.length === 0 && !periodsWithProjects.has(`${r.anio}-${r.mes}`)) {
         out.push(r);
       }
     }
@@ -145,9 +145,9 @@ function DashboardPage() {
 
   const filteredRows = useMemo(() => {
     return indicadoresFromProyectos.filter((r) => {
-      if (filters.anio !== "all" && String(r.anio) !== filters.anio) return false;
-      if (filters.mes !== "all" && String(r.mes) !== filters.mes) return false;
-      if (filters.motivoId !== "all" && r.motivo_id !== filters.motivoId) return false;
+      if (filters.anio.length && !filters.anio.includes(String(r.anio))) return false;
+      if (filters.mes.length && !filters.mes.includes(String(r.mes))) return false;
+      if (filters.motivoId.length && !filters.motivoId.includes(r.motivo_id)) return false;
       return true;
     });
   }, [indicadoresFromProyectos, filters]);
@@ -344,7 +344,7 @@ function MotivoProjectsDialog({
   const isOnTime = motivo?.nombre.toLowerCase() === "on time";
 
   const { data, isLoading } = useQuery({
-    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio, filters.mes, filters.responsable],
+    queryKey: ["proyectos-por-motivo", motivo?.nombre ?? null, filters.anio.join(), filters.mes.join(), filters.responsable.join()],
     enabled: open,
     queryFn: async (): Promise<ProyectoRow[]> => {
       let q = (supabase as any)
@@ -362,9 +362,9 @@ function MotivoProjectsDialog({
           q = q.ilike("motivo", motivo.nombre);
         }
       }
-      if (filters.anio !== "all") q = q.eq("anio", Number(filters.anio));
-      if (filters.mes !== "all") q = q.eq("mes", Number(filters.mes));
-      if (filters.responsable !== "all") q = q.ilike("project_manager", filters.responsable);
+      if (filters.anio.length) q = q.in("anio", filters.anio.map(Number));
+      if (filters.mes.length) q = q.in("mes", filters.mes.map(Number));
+      if (filters.responsable.length) q = q.in("project_manager", filters.responsable);
 
       const { data, error } = await q;
       if (error) throw error;
@@ -384,17 +384,14 @@ function MotivoProjectsDialog({
             {isOnTime ? "Proyectos entregados a tiempo" : `Proyectos afectados: ${motivo?.nombre ?? ""}`}
           </DialogTitle>
           <DialogDescription>
-            {[
-              filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] : null,
-              filters.anio !== "all" ? filters.anio : null,
-              filters.responsable !== "all" ? `Resp.: ${filters.responsable}` : null,
-            ].filter(Boolean).length > 0
-              ? `Filtro: ${[
-                  filters.mes !== "all" ? MONTH_NAMES_ES[Number(filters.mes) - 1] : null,
-                  filters.anio !== "all" ? filters.anio : null,
-                  filters.responsable !== "all" ? `Resp.: ${filters.responsable}` : null,
-                ].filter(Boolean).join(" · ")}`
-              : "Todos los periodos"}
+            {(() => {
+              const parts = [
+                filters.mes.length ? filters.mes.map((m) => MONTH_NAMES_ES[Number(m) - 1]).join(", ") : null,
+                filters.anio.length ? filters.anio.join(", ") : null,
+                filters.responsable.length ? `Resp.: ${filters.responsable.join(", ")}` : null,
+              ].filter(Boolean);
+              return parts.length ? `Filtro: ${parts.join(" · ")}` : "Todos los periodos";
+            })()}
           </DialogDescription>
         </DialogHeader>
 
