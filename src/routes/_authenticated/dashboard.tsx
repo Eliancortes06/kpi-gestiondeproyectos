@@ -216,8 +216,12 @@ function DashboardPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {motivos.filter((m) => m.activo).map((m) => {
           const series = seriesByMotivo[m.id] ?? [];
-          const value = latest ? series.find((s) => s.anio === latest.anio && s.mes === latest.mes)?.value ?? null : null;
-          const prev = previous ? series.find((s) => s.anio === previous.anio && s.mes === previous.mes)?.value ?? null : null;
+          const multi = (filters.anio.length > 0 || filters.mes.length > 0) && periods.length > 1;
+          const vals = series.map((s) => s.value ?? 0);
+          const value = multi
+            ? (vals.length ? Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2)) : null)
+            : latest ? series.find((s) => s.anio === latest.anio && s.mes === latest.mes)?.value ?? null : null;
+          const prev = multi ? null : previous ? series.find((s) => s.anio === previous.anio && s.mes === previous.mes)?.value ?? null : null;
           const isOk = m.nombre.toLowerCase() === "on time";
           return (
             <KpiCard
@@ -267,7 +271,7 @@ function DashboardPage() {
                     paddingAngle={2}
                     stroke="var(--color-background)"
                     strokeWidth={2}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, value }) => `${name} ${Number(value).toFixed(1)}%`}
                     labelLine={false}
                   >
                     {pieData.map((d) => (
