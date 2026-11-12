@@ -60,6 +60,7 @@ const MOTIVOS = [
   "Logistics",
   "BOM",
   "Sub-assembly",
+  "Unit Arrival",
   "Design",
 ];
 

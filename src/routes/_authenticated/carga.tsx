@@ -52,6 +52,9 @@ const MOTIVO_MAP: Record<string, string> = {
   "logistics": "Logistics",
   "logistica": "Logistics",
   "logística": "Logistics",
+  "unit arrival": "Unit Arrival",
+  "unit_arrival": "Unit Arrival",
+  "llegada de unidad": "Unit Arrival",
 };
 
 function normalizeMotivo(raw: unknown): string | null {
